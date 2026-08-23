@@ -31,7 +31,6 @@ upstream-bilibili-ai-bot.zip
 *.db
 *.tmp
 bot.pid
-bot_web.log
 *.log
 
 # Knowledge base
@@ -54,8 +53,6 @@ backups/
 storage/
 
 # Temp / test files
-_test_*.py
-*_test_output.txt
 *_result.json
 _run_*.py
 _verify*.py
@@ -80,7 +77,6 @@ Desktop.ini
 # Reasonix temp
 .reasonix/
 .cipher_key
-.web_secret_key
 
 # Sogou IME accidental directory (created by a known input-method bug)
 /%SystemDrive%/
@@ -89,7 +85,6 @@ Desktop.ini
 /runtime/
 
 # Local builds kept out of the repo
-/web_panel_error*.log
 
 *.key
 *.pem
@@ -98,10 +93,13 @@ password
 *.env
 _panel_stdout.log
 
-# Legacy Android build artifacts
-/arm/
-/cxx-native/
-/Untitled0.ipynb
-/_upgrade_v2.py
-/buildozer.spec
-/.build APK.yml
+# Open-source prep: local scratch data and private workspace files
+dist_old_build/
+qr_codes/
+同步到G盘.bat
+cleanup_c_drive.ps1
+_tmp_js_check.js
+_skill_js_check.js
+_tmp_check.js
+AI_TASK_PROMPT.md
+highlights/
