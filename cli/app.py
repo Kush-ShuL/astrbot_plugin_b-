@@ -5045,8 +5045,12 @@ async def manual_visual_note_analysis():
         traceback.print_exc()
 
 
-async def video_to_html_bg():
-    """🎨 视频→网页: 搜索B站视频, AI生成HTML分析页面（流程复用V功能）"""
+async def video_to_html_bg(query: str | None = None):
+    """🎨 视频→网页: 搜索B站视频, AI生成HTML分析页面（流程复用V功能）
+
+    Args:
+        query: 视频链接 / BV号 / 标题 / UP主名。传入时跳过交互输入（供 AstrBot 指令调用）。
+    """
     from pathlib import Path
     import re as _re
     loop = asyncio.get_running_loop()
@@ -5067,7 +5071,10 @@ async def video_to_html_bg():
     print(f"{Fore.CYAN}+{'='*60}+{Style.RESET_ALL}")
     print(f"{Fore.YELLOW}[INFO] 支持: B站视频链接 | BV号 | 视频标题 | UP主名字{Style.RESET_ALL}")
 
-    user_input = input(f"\n{Fore.CYAN}请输入视频链接/标题/UP主名字: {Style.RESET_ALL}").strip()
+    if query is not None:
+        user_input = str(query).strip()
+    else:
+        user_input = input(f"\n{Fore.CYAN}请输入视频链接/标题/UP主名字: {Style.RESET_ALL}").strip()
     if not user_input: return
 
     # ── 第一步：判断输入类型（复用 V 功能的 _extract_bvid + _resolve_b23_short）──
