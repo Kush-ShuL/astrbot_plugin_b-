@@ -34,6 +34,9 @@ from astrbot.api.star import Context, Star
 _brain_task: asyncio.Task | None = None
 """后台运行的 AgentBrain 任务，None 表示当前没有任务。"""
 
+_brain_task_lock = asyncio.Lock()
+"""串行化 start/stop 对 _brain_task 的状态切换，避免并发指令下引用被写乱。"""
+
 
 def _cli_app():
     """延迟导入 CLI 模块。
@@ -116,23 +119,24 @@ class BilibiliLearningBot(Star):
     async def start_bot(self, event: AstrMessageEvent):
         """在后台启动 B站学习机器人。"""
         global _brain_task
-        if _brain_task is not None and not _brain_task.done():
-            yield event.plain_result(
-                "⚠️ 机器人已在后台运行。发送 /bili_status 查看状态，或发送 /bili_stop 停止。"
-            )
-            return
+        async with _brain_task_lock:
+            if _brain_task is not None and not _brain_task.done():
+                yield event.plain_result(
+                    "⚠️ 机器人已在后台运行。发送 /bili_status 查看状态，或发送 /bili_stop 停止。"
+                )
+                return
 
-        try:
-            from brain.agent_brain import AgentBrain
+            try:
+                from brain.agent_brain import AgentBrain
 
-            brain = AgentBrain()
-        except Exception as exc:
-            _log_exception("初始化机器人", exc)
-            yield event.plain_result(f"❌ 机器人初始化失败: {exc}")
-            return
+                brain = AgentBrain()
+            except Exception as exc:
+                _log_exception("初始化机器人", exc)
+                yield event.plain_result(f"❌ 机器人初始化失败: {exc}")
+                return
 
-        _brain_task = asyncio.create_task(brain.run(), name="bili_learning_brain")
-        _brain_task.add_done_callback(_on_brain_done)
+            _brain_task = asyncio.create_task(brain.run(), name="bili_learning_brain")
+            _brain_task.add_done_callback(_on_brain_done)
         yield event.plain_result(
             "✅ 已在后台启动 B站学习机器人，本指令不会阻塞其他对话。"
             "发送 /bili_stop 可停止。"
@@ -142,20 +146,31 @@ class BilibiliLearningBot(Star):
     async def stop_bot(self, event: AstrMessageEvent):
         """停止后台运行的 B站学习机器人。"""
         global _brain_task
-        if _brain_task is None or _brain_task.done():
+        async with _brain_task_lock:
+            task = _brain_task
             _brain_task = None
+
+        if task is None or task.done():
             yield event.plain_result("ℹ️ 当前没有正在运行的机器人。")
             return
 
-        task = _brain_task
-        _brain_task = None
         task.cancel()
+        # 等任务真正退出（含 AgentBrain 自身的收尾）后再释放锁，避免锁竞争/双重释放
+        try:
+            await asyncio.wait_for(task, timeout=10.0)
+        except asyncio.CancelledError:
+            pass
+        except asyncio.TimeoutError:
+            logger.warning("B站学习机器人 10 秒内未完成收尾，锁将在任务结束时释放")
+        except Exception as exc:
+            _log_exception("等待机器人停止", exc)
+
         try:
             _cli_app()._release_bot_lock()
         except Exception as exc:
             _log_exception("释放机器人锁", exc)
 
-        yield event.plain_result("✅ 已请求停止 B站学习机器人。")
+        yield event.plain_result("✅ 已停止 B站学习机器人。")
 
     @filter.command("bili_config")
     async def show_config(self, event: AstrMessageEvent):
@@ -302,7 +317,13 @@ class BilibiliLearningBot(Star):
         try:
             from brain.video_analysis import up_homepage_learn
 
-            await up_homepage_learn(query=up_id)
+            # 非交互调用：显式给出默认值，避免函数内部三个 input() 阻塞事件循环
+            await up_homepage_learn(
+                query=up_id,
+                limit=10,
+                skip_without_subtitle=True,
+                min_score=7.0,
+            )
         except Exception as exc:
             _log_exception("UP主学习", exc)
             yield event.plain_result(f"❌ UP主学习失败: {exc}")
@@ -318,7 +339,13 @@ class BilibiliLearningBot(Star):
         try:
             from cli.app import video_to_html_bg
 
-            await video_to_html_bg(query=(bvid or "").strip() or None)
+            bvid = (bvid or "").strip()
+            if not bvid:
+                yield event.plain_result(
+                    "ℹ️ 用法：/bili_video2html <bv号/链接>\n例如：/bili_video2html BV1xx411c7mD"
+                )
+                return
+            await video_to_html_bg(query=bvid)
         except Exception as exc:
             _log_exception("视频转HTML", exc)
             yield event.plain_result(f"❌ 视频转HTML失败: {exc}")
@@ -508,10 +535,12 @@ def _run_cli_main() -> None:
     import logging as _logging
 
     # 与 CLI 入口行为保持一致：先打印免责声明，再走主菜单。
-    try:
-        _cli_app()._disclaimer_confirm()
-    except Exception:
-        pass
+    # 非 TTY（管道/重定向/Docker）下读 stdin 会阻塞或直接 EOF，跳过确认。
+    if _is_interactive():
+        try:
+            _cli_app()._disclaimer_confirm()
+        except Exception:
+            pass
 
     while True:
         try:

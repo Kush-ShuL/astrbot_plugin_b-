@@ -5077,6 +5077,9 @@ async def video_to_html_bg(query: str | None = None):
         user_input = input(f"\n{Fore.CYAN}请输入视频链接/标题/UP主名字: {Style.RESET_ALL}").strip()
     if not user_input: return
 
+    # 传入 query 时视为非交互调用（AstrBot 指令），所有 input() 均跳过并使用默认值
+    interactive = query is None
+
     # ── 第一步：判断输入类型（复用 V 功能的 _extract_bvid + _resolve_b23_short）──
     from brain.video_analysis import _extract_bvid, _resolve_b23_short
     bvid = None
@@ -5235,7 +5238,11 @@ async def video_to_html_bg(query: str | None = None):
         print(f"  {Fore.YELLOW} 0.{Style.RESET_ALL} 取消")
         print(f"  {Fore.CYAN}输入UP主名字可搜索TA的最新视频{Style.RESET_ALL}")
 
-        choice = (await loop.run_in_executor(None, input, f"\n{Fore.CYAN}请选择视频编号 (1-{len(results)}): {Style.RESET_ALL}")).strip()
+        if interactive:
+            choice = (await loop.run_in_executor(None, input, f"\n{Fore.CYAN}请选择视频编号 (1-{len(results)}): {Style.RESET_ALL}")).strip()
+        else:
+            choice = "1"
+            print(f"{Fore.CYAN}[AUTO] 非交互模式，默认选择第 1 条结果{Style.RESET_ALL}")
 
         if choice == "0" or choice == "":
             print(f"{Fore.YELLOW}[WARN] 已取消{Style.RESET_ALL}")
@@ -5351,7 +5358,7 @@ async def video_to_html_bg(query: str | None = None):
     print(f"  {Fore.YELLOW}5.{Style.RESET_ALL} 字幕 + 视觉抽帧 — 获取字幕 + 关键帧AI分析")
     print(f"  {Fore.YELLOW}6.{Style.RESET_ALL} 语音识别 + 视觉抽帧 — 下载视频 -> ASR+画面分析")
     print(f"  {Fore.YELLOW}7.{Style.RESET_ALL} 全部分析 — 字幕+ASR+抽帧（智能判断，字幕不足时下载）")
-    am_input = (await loop.run_in_executor(None, input, f"\n{Fore.CYAN}选择 (1-7, 回车=默认7): {Style.RESET_ALL}")).strip()
+    am_input = ((await loop.run_in_executor(None, input, f"\n{Fore.CYAN}选择 (1-7, 回车=默认7): {Style.RESET_ALL}")).strip() if interactive else "")
     if am_input in mode_map:
         force_mode = mode_map[am_input]
         print(f"{Fore.GREEN}[OK] 内容获取方式: {am_input} - {force_mode}{Style.RESET_ALL}")
@@ -5416,7 +5423,7 @@ async def video_to_html_bg(query: str | None = None):
     print(f"  16.🌈 新变风 — 色彩渐变/科技或潮流/视觉抓眼球/Landing Page创意工作室官网")
     print(f"  17.☁️ 柔和流行 — 柔和力和玩具色/手绘插画/卡通插画/圆润字体/儿童APP/UI/健康儿童产品界面")
     print(f"  18.🤖 PromptPort风格 — 深黑背景+霓虹绿青发光+Emoji图标+巨大标题+模块卡片+AI/Web3科技极简")
-    t = (await loop.run_in_executor(None, input, f"{Fore.CYAN}> {Style.RESET_ALL}")).strip()
+    t = ((await loop.run_in_executor(None, input, f"{Fore.CYAN}> {Style.RESET_ALL}")).strip() if interactive else "")
     styles = {'1':'claude_slides','2':'dark','3':'light','4':'slide','5':'card','6':'bento','7':'glass','8':'aurora',
               '9':'neobrutal','10':'oled','11':'cyberpunk','12':'neumorphism','13':'liquid_glass','14':'nostalgic',
               '15':'linear','16':'gradient_new','17':'soft_pop','18':'promptport'}
@@ -5437,7 +5444,7 @@ async def video_to_html_bg(query: str | None = None):
     print(f"  4.🤖 AI建议 — 让AI分析内容后推荐最佳格式")
     print(f"  5.🔬 技术科普动画 — 知识图解+视觉化拆解+3B1B风格叙事")
     print(f"  6.🔀 PPT+科普融合 — 幻灯片框架+图解动画混合，可自定义融合比例")
-    fmt_input = (await loop.run_in_executor(None, input, f"{Fore.CYAN}> {Style.RESET_ALL}")).strip()
+    fmt_input = ((await loop.run_in_executor(None, input, f"{Fore.CYAN}> {Style.RESET_ALL}")).strip() if interactive else "")
     fmt_map = {'1':'webpage','2':'ppt','3':'animation','4':'ai_suggest','5':'tech_explainer','6':'ppt_explainer'}
     output_format = fmt_map.get(fmt_input, 'auto')
 
@@ -5454,7 +5461,7 @@ async def video_to_html_bg(query: str | None = None):
     if output_format in ('ppt', 'animation', 'tech_explainer', 'ppt_explainer', 'auto', 'ai_suggest'):
         print(f"\n{Fore.CYAN}📑 页数设置 (回车=AI自动):{Style.RESET_ALL}")
         print(f"  输入数字指定页数，如 5 或 5-10，直接回车则AI自动决定")
-        pc_input = (await loop.run_in_executor(None, input, f"{Fore.CYAN}> {Style.RESET_ALL}")).strip()
+        pc_input = ((await loop.run_in_executor(None, input, f"{Fore.CYAN}> {Style.RESET_ALL}")).strip() if interactive else "")
         if pc_input:
             try:
                 if '-' in pc_input:
@@ -5475,21 +5482,21 @@ async def video_to_html_bg(query: str | None = None):
     print(f"  1.✂️ 简短 — 精简要点，快速浏览")
     print(f"  2.📖 中长 — 内容充实，适合阅读")
     print(f"  3.📚 很长 — 深度展开，面面俱到")
-    dl_input = (await loop.run_in_executor(None, input, f"{Fore.CYAN}> {Style.RESET_ALL}")).strip()
+    dl_input = ((await loop.run_in_executor(None, input, f"{Fore.CYAN}> {Style.RESET_ALL}")).strip() if interactive else "")
     detail_map = {'1':'brief','2':'medium','3':'long'}
     detail_level = detail_map.get(dl_input, 'medium')
     
     # 自定义提示词
     print(f"\n{Fore.CYAN}✏️ 自定义提示词/系统指令 (可选, 回车跳过):{Style.RESET_ALL}")
     print(f"  {Fore.LIGHTBLACK_EX}例如: 用学术风格写 / 面向小学生 / 侧重数据分析 / 翻译成英文{Style.RESET_ALL}")
-    custom = (await loop.run_in_executor(None, input, f"{Fore.CYAN}> {Style.RESET_ALL}")).strip()
+    custom = ((await loop.run_in_executor(None, input, f"{Fore.CYAN}> {Style.RESET_ALL}")).strip() if interactive else "")
 
     # ── 弹幕/评论是否包含到 HTML 中 ──
     include_danmaku_comment = False
     print(f"\n{Fore.CYAN}💬 是否将弹幕和热门评论也加入到HTML内容中？{Style.RESET_ALL}")
     print(f"  {Fore.YELLOW}1.{Style.RESET_ALL} 是 — 获取弹幕+热门评论，AI会整合到HTML中（更丰富）")
     print(f"  {Fore.YELLOW}2.{Style.RESET_ALL} 否 — 仅使用视频字幕内容（更快更精简）")
-    dc_input = (await loop.run_in_executor(None, input, f"{Fore.CYAN}> (回车=默认:否) {Style.RESET_ALL}")).strip()
+    dc_input = ((await loop.run_in_executor(None, input, f"{Fore.CYAN}> (回车=默认:否) {Style.RESET_ALL}")).strip() if interactive else "")
     if dc_input == "1":
         include_danmaku_comment = True
         print(f"{Fore.GREEN}[OK] 将获取弹幕和评论并加入HTML{Style.RESET_ALL}")
@@ -5562,7 +5569,7 @@ async def video_to_html_bg(query: str | None = None):
     print(f"\n{Fore.CYAN}📐 前后固定页设置 (回车=保留默认):{Style.RESET_ALL}")
     print(f"  默认前两页=封面+数据概览，最后两页=金句+总结")
     print(f"  输入 n=AI自由设计所有页面，或输入自定义描述")
-    slide_frame_input = (await loop.run_in_executor(None, input, f"{Fore.CYAN}> {Style.RESET_ALL}")).strip()
+    slide_frame_input = ((await loop.run_in_executor(None, input, f"{Fore.CYAN}> {Style.RESET_ALL}")).strip() if interactive else "")
     slide_frame_custom = slide_frame_input  # ''=默认, 'n'=自由设计, 其他=自定义描述
 
     # generate HTML — spinning animation
@@ -5781,19 +5788,20 @@ Link: {video_url}
             preview_url = start_preview_server(html)
             print(f"\n{Fore.CYAN}🌐 Flask预览服务已启动: {preview_url}{Style.RESET_ALL}")
 
-            # 浏览器打开预览
-            try:
-                import webbrowser
-                webbrowser.open(preview_url)
-                print(f"{Fore.CYAN}[INFO] 已在浏览器中打开预览页面{Style.RESET_ALL}")
-            except Exception:
-                print(f"{Fore.YELLOW}[WARN] 无法自动打开浏览器，请手动访问: {preview_url}{Style.RESET_ALL}")
+            # 浏览器打开预览（仅交互式 CLI；AstrBot 环境下没有本机浏览器）
+            if interactive:
+                try:
+                    import webbrowser
+                    webbrowser.open(preview_url)
+                    print(f"{Fore.CYAN}[INFO] 已在浏览器中打开预览页面{Style.RESET_ALL}")
+                except Exception:
+                    print(f"{Fore.YELLOW}[WARN] 无法自动打开浏览器，请手动访问: {preview_url}{Style.RESET_ALL}")
         except ImportError as e:
             print(f"{Fore.YELLOW}[WARN] Flask未安装，无法启动预览: {e}{Style.RESET_ALL}")
             preview_url = ""
         
-        # ── AI布局检测/修复（循环迭代，可多轮修复）──
-        while True:
+        # ── AI布局检测/修复（循环迭代，可多轮修复；非交互模式直接跳过）──
+        while interactive:
             print(f"\n{Fore.CYAN}🔧 布局检测与修复:{Style.RESET_ALL}")
             print(f"  {Fore.YELLOW}1.{Style.RESET_ALL} 🤖 AI自动检测+修复 — 让AI检查并修正布局/样式问题")
             print(f"  {Fore.YELLOW}2.{Style.RESET_ALL} 💬 Agent反馈修复 — 你描述问题，AI针对性修复（可多轮迭代）")
@@ -5910,7 +5918,8 @@ Link: {video_url}
 
         print(f"{Fore.LIGHTBLACK_EX}   默认保存路径: {os.path.join(default_save_dir, default_filename)}{Style.RESET_ALL}")
         print(f"{Fore.CYAN}   支持: Enter=默认保存 | n=跳过 | 完整路径 | 目录(自动命名){Style.RESET_ALL}")
-        save_input = input(f"{Fore.GREEN}> {Style.RESET_ALL}").strip()
+        # 非交互调用（AstrBot）直接保存到默认路径，不询问
+        save_input = (input(f"{Fore.GREEN}> {Style.RESET_ALL}").strip() if interactive else "")
 
         if save_input.lower() == 'n':
             print(f"{Fore.YELLOW}[SKIP] 未保存文件（预览页面仍可访问）{Style.RESET_ALL}")
@@ -5939,11 +5948,12 @@ Link: {video_url}
             save_path.write_text(html, encoding='utf-8')
             print(f"{Fore.GREEN}[OK] 已保存到: {save_path.resolve()}{Style.RESET_ALL}")
 
-        # ── 附加导出：Word / PDF / PPT（与主流程共享同一视频内容 ctx）──
-        from services.document_export import export_video_content_interactive
-        await export_video_content_interactive(
-            title, up_name, video_url, ctx,
-            stats=stats, desc=desc, bvid=bvid, brain=brain)
+        # ── 附加导出：Word / PDF / PPT（交互式菜单，非交互模式跳过）──
+        if interactive:
+            from services.document_export import export_video_content_interactive
+            await export_video_content_interactive(
+                title, up_name, video_url, ctx,
+                stats=stats, desc=desc, bvid=bvid, brain=brain)
 
         # 提示：预览服务器将在程序退出时自动关闭
         if preview_url:

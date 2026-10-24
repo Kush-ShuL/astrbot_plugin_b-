@@ -2013,22 +2013,29 @@ async def up_homepage_learn(
                     print(f"      {Fore.LIGHTBLACK_EX}{sign}{Style.RESET_ALL}")
             print(f"  {Fore.YELLOW} 0.{Style.RESET_ALL} 取消")
 
-            choice = input(f"\n{Fore.CYAN}请选择UP主编号 (1-{min(len(user_items), 10)}): {Style.RESET_ALL}").strip()
-            if choice == "0" or choice == "":
-                print(f"{Fore.YELLOW}[WARN] 已取消{Style.RESET_ALL}")
-                return
-            try:
-                idx = int(choice) - 1
-                if 0 <= idx < min(len(user_items), 10):
-                    chosen = user_items[idx]
-                    up_uid = int(chosen.get("mid") or chosen.get("uid", 0))
-                    up_name = chosen.get("uname") or chosen.get("name", "")
-                else:
-                    print(f"{Fore.RED}[ERROR] 无效选项{Style.RESET_ALL}")
+            if query is not None:
+                # 非交互调用（AstrBot 指令）：直接取第一条搜索结果，避免 input() 阻塞
+                chosen = user_items[0]
+                up_uid = int(chosen.get("mid") or chosen.get("uid", 0))
+                up_name = chosen.get("uname") or chosen.get("name", "")
+                print(f"{Fore.GREEN}[AUTO] 非交互模式，自动选择: {up_name} (UID: {up_uid}){Style.RESET_ALL}")
+            else:
+                choice = input(f"\n{Fore.CYAN}请选择UP主编号 (1-{min(len(user_items), 10)}): {Style.RESET_ALL}").strip()
+                if choice == "0" or choice == "":
+                    print(f"{Fore.YELLOW}[WARN] 已取消{Style.RESET_ALL}")
                     return
-            except ValueError:
-                print(f"{Fore.RED}[ERROR] 请输入数字{Style.RESET_ALL}")
-                return
+                try:
+                    idx = int(choice) - 1
+                    if 0 <= idx < min(len(user_items), 10):
+                        chosen = user_items[idx]
+                        up_uid = int(chosen.get("mid") or chosen.get("uid", 0))
+                        up_name = chosen.get("uname") or chosen.get("name", "")
+                    else:
+                        print(f"{Fore.RED}[ERROR] 无效选项{Style.RESET_ALL}")
+                        return
+                except ValueError:
+                    print(f"{Fore.RED}[ERROR] 请输入数字{Style.RESET_ALL}")
+                    return
         except Exception as e:
             print(f"{Fore.RED}[ERROR] 搜索UP主失败: {e}{Style.RESET_ALL}")
             return
@@ -2117,7 +2124,11 @@ async def up_homepage_learn(
             except ValueError:
                 watch_count = len(vlist)
     else:
-        watch_count = max(1, min(int(limit), len(vlist)))
+        try:
+            watch_count = max(1, min(int(limit), len(vlist)))
+        except (TypeError, ValueError):
+            print(f"{Fore.YELLOW}[WARN] limit 参数无效: {limit!r}，改为学习全部 {len(vlist)} 个{Style.RESET_ALL}")
+            watch_count = len(vlist)
     print(f"{Fore.GREEN}[OK] 将学习 {watch_count} 个视频{Style.RESET_ALL}")
 
     # 跳过无字幕
@@ -2136,7 +2147,11 @@ async def up_homepage_learn(
         except ValueError:
             learn_threshold = 7.0
     else:
-        learn_threshold = max(1.0, min(10.0, float(min_score)))
+        try:
+            learn_threshold = max(1.0, min(10.0, float(min_score)))
+        except (TypeError, ValueError):
+            print(f"{Fore.YELLOW}[WARN] min_score 参数无效: {min_score!r}，使用默认 7.0{Style.RESET_ALL}")
+            learn_threshold = 7.0
     print(f"{Fore.GREEN}[OK] 低于 {learn_threshold} 分的内容不归档{Style.RESET_ALL}")
 
     # ── 第四步：逐个学习 ──
