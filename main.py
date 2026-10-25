@@ -34,6 +34,9 @@ from astrbot.api.star import Context, Star
 _brain_task: asyncio.Task | None = None
 """后台运行的 AgentBrain 任务，None 表示当前没有任务。"""
 
+_brain_stopping = False
+"""停止流程进行中标记，避免并发 stop 重复取消任务或误报“已停止”。"""
+
 _brain_task_lock = asyncio.Lock()
 """串行化 start/stop 对 _brain_task 的状态切换，避免并发指令下引用被写乱。"""
 
@@ -83,15 +86,18 @@ def _on_brain_done(task: asyncio.Task) -> None:
     Args:
         task: 已结束的后台任务。
     """
-    global _brain_task
-    if _brain_task is task:
+    global _brain_task, _brain_stopping
+    is_current = _brain_task is task
+    if is_current:
         _brain_task = None
-    # 单实例锁统一在任务真正结束时释放（无论正常退出、被取消还是异常），
-    # 避免 stop 超时后锁被提前释放导致多实例竞争
-    try:
-        _cli_app()._release_bot_lock()
-    except Exception as exc:
-        _log_exception("释放机器人锁", exc)
+        _brain_stopping = False
+    # 单实例锁只在当前任务真正结束时释放：避免过期回调误释放已被新任务持有的锁，
+    # 也避免 stop 超时后锁被提前释放导致多实例竞争
+    if is_current:
+        try:
+            _cli_app()._release_bot_lock()
+        except Exception as exc:
+            _log_exception("释放机器人锁", exc)
     if task.cancelled():
         logger.info("B站学习机器人已被停止")
         return
@@ -126,6 +132,9 @@ class BilibiliLearningBot(Star):
         """在后台启动 B站学习机器人。"""
         global _brain_task
         async with _brain_task_lock:
+            if _brain_stopping:
+                yield event.plain_result("⏳ 机器人正在停止中，请稍后再启动。")
+                return
             if _brain_task is not None and not _brain_task.done():
                 yield event.plain_result(
                     "⚠️ 机器人已在后台运行。发送 /bili_status 查看状态，或发送 /bili_stop 停止。"
@@ -151,15 +160,23 @@ class BilibiliLearningBot(Star):
     @filter.command("bili_stop")
     async def stop_bot(self, event: AstrMessageEvent):
         """停止后台运行的 B站学习机器人。"""
-        global _brain_task
+        global _brain_stopping
+        reply = ""
         async with _brain_task_lock:
             task = _brain_task
+            if task is None or task.done():
+                reply = "ℹ️ 当前没有正在运行的机器人。"
+            elif _brain_stopping:
+                reply = "⏳ 机器人正在停止中，请稍候。"
+            else:
+                # 在锁内置位“停止中”并取消，保证并发 stop 只有一个进入等待流程
+                _brain_stopping = True
+                task.cancel()
 
-        if task is None or task.done():
-            yield event.plain_result("ℹ️ 当前没有正在运行的机器人。")
+        if reply:
+            yield event.plain_result(reply)
             return
 
-        task.cancel()
         # 等任务真正退出（含 AgentBrain 自身的收尾）。锁由 _on_brain_done
         # 在任务结束时统一释放；超时则保留任务引用与锁，避免误报"已停止"
         stopped = False
@@ -167,13 +184,17 @@ class BilibiliLearningBot(Star):
             await asyncio.wait_for(task, timeout=10.0)
             stopped = True
         except asyncio.CancelledError:
+            # 只有任务自身被取消才算停止；本协程被取消时继续向上传播
+            if not task.cancelled():
+                raise
             stopped = True
         except asyncio.TimeoutError:
             logger.warning("B站学习机器人 10 秒内未完成收尾，保留任务引用与单实例锁")
         except Exception as exc:
             _log_exception("等待机器人停止", exc)
 
-        if stopped:
+        # 仅在实际观察到任务结束（done）时才报告“已停止”
+        if stopped or task.done():
             yield event.plain_result("✅ 已停止 B站学习机器人。")
         else:
             yield event.plain_result(
