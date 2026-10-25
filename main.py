@@ -86,6 +86,12 @@ def _on_brain_done(task: asyncio.Task) -> None:
     global _brain_task
     if _brain_task is task:
         _brain_task = None
+    # 单实例锁统一在任务真正结束时释放（无论正常退出、被取消还是异常），
+    # 避免 stop 超时后锁被提前释放导致多实例竞争
+    try:
+        _cli_app()._release_bot_lock()
+    except Exception as exc:
+        _log_exception("释放机器人锁", exc)
     if task.cancelled():
         logger.info("B站学习机器人已被停止")
         return
@@ -148,29 +154,31 @@ class BilibiliLearningBot(Star):
         global _brain_task
         async with _brain_task_lock:
             task = _brain_task
-            _brain_task = None
 
         if task is None or task.done():
             yield event.plain_result("ℹ️ 当前没有正在运行的机器人。")
             return
 
         task.cancel()
-        # 等任务真正退出（含 AgentBrain 自身的收尾）后再释放锁，避免锁竞争/双重释放
+        # 等任务真正退出（含 AgentBrain 自身的收尾）。锁由 _on_brain_done
+        # 在任务结束时统一释放；超时则保留任务引用与锁，避免误报"已停止"
+        stopped = False
         try:
             await asyncio.wait_for(task, timeout=10.0)
+            stopped = True
         except asyncio.CancelledError:
-            pass
+            stopped = True
         except asyncio.TimeoutError:
-            logger.warning("B站学习机器人 10 秒内未完成收尾，锁将在任务结束时释放")
+            logger.warning("B站学习机器人 10 秒内未完成收尾，保留任务引用与单实例锁")
         except Exception as exc:
             _log_exception("等待机器人停止", exc)
 
-        try:
-            _cli_app()._release_bot_lock()
-        except Exception as exc:
-            _log_exception("释放机器人锁", exc)
-
-        yield event.plain_result("✅ 已停止 B站学习机器人。")
+        if stopped:
+            yield event.plain_result("✅ 已停止 B站学习机器人。")
+        else:
+            yield event.plain_result(
+                "⏳ 已请求停止，但机器人仍在收尾。收尾完成前无法重新启动，请稍后再试。"
+            )
 
     @filter.command("bili_config")
     async def show_config(self, event: AstrMessageEvent):

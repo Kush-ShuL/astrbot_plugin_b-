@@ -5782,23 +5782,26 @@ Link: {video_url}
     print(f"{Fore.GREEN}[3/3] HTML已生成! 文件大小: {len(html)} 字符{Style.RESET_ALL}")
 
     try:
-        # ── Flask 预览 ──
-        try:
-            from services.video_to_ppt import start_preview_server, stop_preview_server
-            preview_url = start_preview_server(html)
-            print(f"\n{Fore.CYAN}🌐 Flask预览服务已启动: {preview_url}{Style.RESET_ALL}")
+        # ── Flask 预览（仅交互式 CLI；非交互/AstrBot 环境下不启动本地服务）──
+        if interactive:
+            try:
+                from services.video_to_ppt import start_preview_server, stop_preview_server
+                preview_url = start_preview_server(html)
+                print(f"\n{Fore.CYAN}🌐 Flask预览服务已启动: {preview_url}{Style.RESET_ALL}")
 
-            # 浏览器打开预览（仅交互式 CLI；AstrBot 环境下没有本机浏览器）
-            if interactive:
+                # 浏览器打开预览（AstrBot 环境下没有本机浏览器）
                 try:
                     import webbrowser
                     webbrowser.open(preview_url)
                     print(f"{Fore.CYAN}[INFO] 已在浏览器中打开预览页面{Style.RESET_ALL}")
                 except Exception:
                     print(f"{Fore.YELLOW}[WARN] 无法自动打开浏览器，请手动访问: {preview_url}{Style.RESET_ALL}")
-        except ImportError as e:
-            print(f"{Fore.YELLOW}[WARN] Flask未安装，无法启动预览: {e}{Style.RESET_ALL}")
+            except ImportError as e:
+                print(f"{Fore.YELLOW}[WARN] Flask未安装，无法启动预览: {e}{Style.RESET_ALL}")
+                preview_url = ""
+        else:
             preview_url = ""
+            print(f"{Fore.CYAN}[INFO] 非交互模式，跳过本地预览服务，HTML 已生成{Style.RESET_ALL}")
         
         # ── AI布局检测/修复（循环迭代，可多轮修复；非交互模式直接跳过）──
         while interactive:
