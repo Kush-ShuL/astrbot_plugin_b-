@@ -1,5 +1,16 @@
 # 更新日志
 
+## 未发布
+
+### 🔧 插件模式修复（issue #17）
+- `main.py` 不再在模块顶层导入 `cli.app` / `brain` / `knowledge`，改为按需延迟导入；缺失可选依赖时插件仍能正常加载并注册指令，出错时给出明确提示。
+- 移除 `BilibiliLearningBot.__init__` 中的交互式免责声明确认与 `WindowsSelectorEventLoopPolicy` 全局设置：AstrBot 加载插件时不再阻塞 stdin、也不再改动宿主事件循环策略。
+- `/bili_start` 改为后台任务，指令立即返回，不再阻塞 bot 事件循环；新增 `/bili_stop` 停止后台任务并释放单实例锁。
+- 交互式 CLI 菜单（登录 / 兴趣 / 评论 / 导出 / 导入 / 恢复出厂 / 自定义知识管理）在非 TTY 环境下直接返回使用提示，在 TTY 下放到线程执行，避免阻塞事件循环。
+- 修复被忽略的参数：`/bili_analyze <bvid>` 走 `analyze_bilibili_video_input`，`/bili_up_learn <uid>` 走 `up_homepage_learn(query=...)`，`/bili_video2html <bvid>` 走 `video_to_html_bg(query=...)`。
+- `/bili_kb_list` 现在会真实列出知识库分类与条目数量，不再只返回一句提示。
+- 所有异常日志统一输出 traceback，不再丢失堆栈。
+
 ## 3.1.2 正式发布版 (2026-08-01)
 
 > 本版本合入了 3.1.3 / 3.1.4 / 3.1.5 内部迭代的所有修复与发布验收内容。

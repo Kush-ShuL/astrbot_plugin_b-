@@ -1932,14 +1932,29 @@ AI判断: {thought}
 # [U] UP主主页批量学习 — 获取UP主主页视频列表，逐个AI学习归档
 # ==============================================================================
 
-async def up_homepage_learn():
-    """UP主主页批量学习：输入UP主名字/UID，获取主页视频列表，用户设置数量后逐个AI学习。"""
+async def up_homepage_learn(
+    query: str | None = None,
+    limit: int | None = None,
+    skip_without_subtitle: bool | None = None,
+    min_score: float | None = None,
+):
+    """UP主主页批量学习：输入UP主名字/UID，获取主页视频列表，用户设置数量后逐个AI学习。
+
+    Args:
+        query: UP主名字或UID。传入时跳过交互输入（供 AstrBot 指令调用）。
+        limit: 本次学习的视频数量，None 表示交互询问。
+        skip_without_subtitle: 是否跳过无字幕视频，None 表示交互询问。
+        min_score: 低于该分数的视频不归档，None 表示交互询问。
+    """
     print(f"\n{Fore.CYAN}+============================================================+{Style.RESET_ALL}")
     print(f"{Fore.CYAN}|               📚 UP主主页批量学习                            |{Style.RESET_ALL}")
     print(f"{Fore.CYAN}+============================================================+{Style.RESET_ALL}")
     print(f"{Fore.YELLOW}[INFO] 输入UP主名字或UID，获取TA主页的视频进行AI学习{Style.RESET_ALL}")
 
-    user_input = input(f"\n{Fore.CYAN}请输入UP主名字或UID: {Style.RESET_ALL}").strip()
+    if query is not None:
+        user_input = str(query).strip()
+    else:
+        user_input = input(f"\n{Fore.CYAN}请输入UP主名字或UID: {Style.RESET_ALL}").strip()
     if not user_input:
         print(f"{Fore.YELLOW}[WARN] 输入为空，已取消{Style.RESET_ALL}")
         return
@@ -1998,22 +2013,29 @@ async def up_homepage_learn():
                     print(f"      {Fore.LIGHTBLACK_EX}{sign}{Style.RESET_ALL}")
             print(f"  {Fore.YELLOW} 0.{Style.RESET_ALL} 取消")
 
-            choice = input(f"\n{Fore.CYAN}请选择UP主编号 (1-{min(len(user_items), 10)}): {Style.RESET_ALL}").strip()
-            if choice == "0" or choice == "":
-                print(f"{Fore.YELLOW}[WARN] 已取消{Style.RESET_ALL}")
-                return
-            try:
-                idx = int(choice) - 1
-                if 0 <= idx < min(len(user_items), 10):
-                    chosen = user_items[idx]
-                    up_uid = int(chosen.get("mid") or chosen.get("uid", 0))
-                    up_name = chosen.get("uname") or chosen.get("name", "")
-                else:
-                    print(f"{Fore.RED}[ERROR] 无效选项{Style.RESET_ALL}")
+            if query is not None:
+                # 非交互调用（AstrBot 指令）：直接取第一条搜索结果，避免 input() 阻塞
+                chosen = user_items[0]
+                up_uid = int(chosen.get("mid") or chosen.get("uid", 0))
+                up_name = chosen.get("uname") or chosen.get("name", "")
+                print(f"{Fore.GREEN}[AUTO] 非交互模式，自动选择: {up_name} (UID: {up_uid}){Style.RESET_ALL}")
+            else:
+                choice = input(f"\n{Fore.CYAN}请选择UP主编号 (1-{min(len(user_items), 10)}): {Style.RESET_ALL}").strip()
+                if choice == "0" or choice == "":
+                    print(f"{Fore.YELLOW}[WARN] 已取消{Style.RESET_ALL}")
                     return
-            except ValueError:
-                print(f"{Fore.RED}[ERROR] 请输入数字{Style.RESET_ALL}")
-                return
+                try:
+                    idx = int(choice) - 1
+                    if 0 <= idx < min(len(user_items), 10):
+                        chosen = user_items[idx]
+                        up_uid = int(chosen.get("mid") or chosen.get("uid", 0))
+                        up_name = chosen.get("uname") or chosen.get("name", "")
+                    else:
+                        print(f"{Fore.RED}[ERROR] 无效选项{Style.RESET_ALL}")
+                        return
+                except ValueError:
+                    print(f"{Fore.RED}[ERROR] 请输入数字{Style.RESET_ALL}")
+                    return
         except Exception as e:
             print(f"{Fore.RED}[ERROR] 搜索UP主失败: {e}{Style.RESET_ALL}")
             return
@@ -2092,27 +2114,44 @@ async def up_homepage_learn():
     # ── 第三步：设置参数 ──
     print(f"\n{Fore.CYAN}设置学习参数:{Style.RESET_ALL}")
 
-    count_input = input(f"{Fore.YELLOW}要学习几个视频？(1-{len(vlist)}, 回车=全部{len(vlist)}个): {Style.RESET_ALL}").strip()
-    if not count_input:
-        watch_count = len(vlist)
+    if limit is None:
+        count_input = input(f"{Fore.YELLOW}要学习几个视频？(1-{len(vlist)}, 回车=全部{len(vlist)}个): {Style.RESET_ALL}").strip()
+        if not count_input:
+            watch_count = len(vlist)
+        else:
+            try:
+                watch_count = max(1, min(int(count_input), len(vlist)))
+            except ValueError:
+                watch_count = len(vlist)
     else:
         try:
-            watch_count = max(1, min(int(count_input), len(vlist)))
-        except ValueError:
+            watch_count = max(1, min(int(limit), len(vlist)))
+        except (TypeError, ValueError):
+            print(f"{Fore.YELLOW}[WARN] limit 参数无效: {limit!r}，改为学习全部 {len(vlist)} 个{Style.RESET_ALL}")
             watch_count = len(vlist)
     print(f"{Fore.GREEN}[OK] 将学习 {watch_count} 个视频{Style.RESET_ALL}")
 
     # 跳过无字幕
-    skip_no_sub = input(f"{Fore.YELLOW}跳过无字幕视频？(y/n, 回车=跳过): {Style.RESET_ALL}").strip().lower()
-    skip_no_sub = skip_no_sub != "n"  # 默认跳过
+    if skip_without_subtitle is None:
+        skip_input = input(f"{Fore.YELLOW}跳过无字幕视频？(y/n, 回车=跳过): {Style.RESET_ALL}").strip().lower()
+        skip_no_sub = skip_input != "n"  # 默认跳过
+    else:
+        skip_no_sub = bool(skip_without_subtitle)
 
     # 干货阈值
-    threshold_input = input(f"{Fore.YELLOW}低于几分跳过不归档？(1-10, 回车=默认7分): {Style.RESET_ALL}").strip()
-    try:
-        learn_threshold = float(threshold_input) if threshold_input else 7.0
-        learn_threshold = max(1.0, min(10.0, learn_threshold))
-    except ValueError:
-        learn_threshold = 7.0
+    if min_score is None:
+        threshold_input = input(f"{Fore.YELLOW}低于几分跳过不归档？(1-10, 回车=默认7分): {Style.RESET_ALL}").strip()
+        try:
+            learn_threshold = float(threshold_input) if threshold_input else 7.0
+            learn_threshold = max(1.0, min(10.0, learn_threshold))
+        except ValueError:
+            learn_threshold = 7.0
+    else:
+        try:
+            learn_threshold = max(1.0, min(10.0, float(min_score)))
+        except (TypeError, ValueError):
+            print(f"{Fore.YELLOW}[WARN] min_score 参数无效: {min_score!r}，使用默认 7.0{Style.RESET_ALL}")
+            learn_threshold = 7.0
     print(f"{Fore.GREEN}[OK] 低于 {learn_threshold} 分的内容不归档{Style.RESET_ALL}")
 
     # ── 第四步：逐个学习 ──
