@@ -98,6 +98,7 @@
 
 [MIT](LICENSE) © xiaoyaya191
 
+[作者插件群](点击链接加入群聊【the relax club（重建ing）】：https://qun.qq.com/universal-share/share?ac=1&authKey=g11r7YZ32NvsrmF6gs1p3jz%2FwPFaZvDqNTo2%2Bd1qJ0oi9QtKEUj48IuK%2BEYpJeVR&busi_data=eyJncm91cENvZGUiOiIxMDc1OTIwMzIzIiwidG9rZW4iOiJKbzdIbHRxVTV1OEovOG1MaVk2RWZMWkJvMjd3UVhNNktYOEViZVMrMDJ5bFEwa1lwRFlmdVBUUU4wTFkzRWsxIiwidWluIjoiMTczMTUzODMzNCJ9&data=Ee7Fzotcpdxp4NMkkSOCUWLBvNfkgreKTW5hcIg2_w337UccGjJgPcL-obkS2n6iraxtTqgDgZ1LxZ6UCfJY3Q&svctype=4&tempid=h5_group_info)
 
 #英文版
 # bilibili_learning_bot
@@ -218,3 +219,5 @@ Default 18083; auto-increments if occupied. Or `set WEB_PORT=xxxx && python web_
 ## 📄 License
 
 [MIT](LICENSE) © xiaoyaya191
+
+[my plugin group](点击链接加入群聊【the relax club（重建ing）】：https://qun.qq.com/universal-share/share?ac=1&authKey=g11r7YZ32NvsrmF6gs1p3jz%2FwPFaZvDqNTo2%2Bd1qJ0oi9QtKEUj48IuK%2BEYpJeVR&busi_data=eyJncm91cENvZGUiOiIxMDc1OTIwMzIzIiwidG9rZW4iOiJKbzdIbHRxVTV1OEovOG1MaVk2RWZMWkJvMjd3UVhNNktYOEViZVMrMDJ5bFEwa1lwRFlmdVBUUU4wTFkzRWsxIiwidWluIjoiMTczMTUzODMzNCJ9&data=Ee7Fzotcpdxp4NMkkSOCUWLBvNfkgreKTW5hcIg2_w337UccGjJgPcL-obkS2n6iraxtTqgDgZ1LxZ6UCfJY3Q&svctype=4&tempid=h5_group_info)
