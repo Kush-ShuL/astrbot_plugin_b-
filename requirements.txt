@@ -8,9 +8,8 @@
 #    这些包由 AstrBot 核心统一提供并受核心依赖保护机制管控，插件
 #    重复声明（无论精确锁定还是区间）都会与之产生版本冲突，导致
 #    安装被拦截（见 issues #18 / #20）。
-#    核心 v4.29.1 的 requirements.txt 已声明：
-#      openai>=1.78.0 / pydantic>=2.12.5 / httpx[socks]>=0.28.1 /
-#      pillow>=11.2.1 / qrcode>=8.2 / python-docx>=1.2.0 / reportlab>=5.0.0
+#    核心依赖的最低版本统一维护在 main.py 的 _CORE_PROVIDED_DEPENDENCIES，
+#    此处不重复版本号；socksio 是可选的 SOCKS 代理依赖，缺失时仅警告。
 #    插件仅使用其中稳定的公开 API（如 openai 的 client.chat.completions.create），
 #    不依赖核心未覆盖的版本特性。
 #
