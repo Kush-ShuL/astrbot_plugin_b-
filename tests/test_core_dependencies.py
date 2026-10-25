@@ -94,6 +94,10 @@ class CoreDependencyTests(unittest.TestCase):
         with dependency_environment():
             self.assertEqual(self.main._check_core_dependencies(), [])
 
+    def test_astrbot_4293_openai_version_is_accepted(self):
+        with dependency_environment(versions={"openai": "2.46.0"}):
+            self.assertEqual(self.main._check_core_dependencies(), [])
+
     def test_missing_socksio_only_warns(self):
         with dependency_environment(missing={"socksio"}):
             self.assertEqual(self.main._check_core_dependencies(), [])

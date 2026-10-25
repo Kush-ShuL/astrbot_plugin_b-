@@ -2,7 +2,7 @@
 
 > **B站 AI 学习互动机器人** — AI 自动刷视频、学知识、评论互动、私信回复、自我进化
 >
-> 版本: **3.1.2** | License: MIT 
+> 版本: **3.1.6** | License: MIT
 >
 >此插件改写经过原作者xiaoyaya
 [bilibili_learning_bot](https://github.com/xiaoyaya191/bilibili_learning_bot)同意
@@ -50,9 +50,35 @@
 
 ---
 
+## 🛠️ 安装依赖冲突排查（issue #25）
+
+若 AstrBot v4.29.3 报 `openai==2.33.0` 与核心保护的 `openai==2.46.0` 冲突，
+**不要降级核心 OpenAI 包或关闭依赖保护**。旧版 3.1.2 曾锁定该版本，当前清单已移除该声明；
+修复版本标识为 **3.1.6**（详见 [更新日志](CHANGELOG.md)）。冲突日志本身不能证明下载来源或缓存状态。
+
+1. 从本仓库 `https://github.com/mjy1113451/astrbot_plugin_b-` 的 `main` 更新或重新下载安装包，
+   核对包内 `metadata.yaml` 的 `version` 与 `VERSION` 都是 `3.1.6`。若商店仍显示 3.1.2，刷新来源并使用强制更新；
+   商店/自定义源若配置了固定 `download_url`，维护者还需更新该地址，单改版本号不会替换固定旧包。
+   自行制作标签/发行包时应从包含此修复的提交构建，不能复用旧源码包。
+2. 在日志给出的**实际安装目录**核对 `requirements.txt`，不要只看 GitHub 页面。
+   该文件的有效依赖行不应直接声明上述核心包。若仍有 `openai==2.33.0`，说明实际使用的清单不是修复后的清单；
+   保留日志和现有配置/数据，确认安装来源后再重新获取源码，不要直接删除运行目录。
+3. 在 AstrBot **同一 Python 环境**中执行以下命令，只解析不安装，检查完整依赖链是否仍引入冲突：
+
+   ```bash
+   python -m pip install --dry-run --report dependency-report.json -r requirements.txt
+   ```
+
+   此命令只验证基础依赖链，不等同于 AstrBot 带动态核心约束的安装验证。
+   若实际清单正确但仍失败，请提供下载地址或提交 SHA、包内版本、有效依赖行及完整解析日志，
+   并核对日志中的 `Pip package manager argv`、实际 constraints 文件和额外 pip 参数，
+   以便区分旧源码、安装镜像/缓存或传递依赖冲突。`/bili_start` 的预检在插件加载后才执行，不能修复安装阶段的旧依赖声明。
+
+---
+
 ## 📊 v3.0.2 → v3.1.x 版本对比
 
-| 维度 | v3.0.2 | v3.1.2+（当前 3.1.2） |
+| 维度 | v3.0.2 | v3.1.2+（当前 3.1.6） |
 |------|--------|----------------------|
 | **代码规模** | 77 个 Python 文件 / ~34k 行 | 113 个 Python 文件 / ~54k 行（+47%） |
 | **数据目录** | 项目内 `Data/`（打包/升级易丢） | ✅ `%LOCALAPPDATA%\BiliLearn`（打包产物零隐私数据，升级不丢） |
@@ -105,7 +131,7 @@
 
 > **Bilibili AI Learning Bot** — An AI that auto-watches videos, learns knowledge, interacts via comments, replies to DMs, evolves itself, with a built-in Web admin panel, and one-click Windows EXE packaging.
 >
-> Version: **3.1.2** | License: MIT
+> Version: **3.1.6** | License: MIT
 
 ---
 
@@ -137,7 +163,7 @@
 
 ## 📊 Version Comparison: v3.0.2 → v3.1.x
 
-| Dimension | v3.0.2 | v3.1.2+ (current 3.1.2) |
+| Dimension | v3.0.2 | v3.1.2+ (current 3.1.6) |
 |-----------|--------|--------------------------|
 | **Code Size** | 77 Python files / ~34k lines | 113 Python files / ~54k lines (+47%) |
 | **Data Directory** | In-project `Data/` (lost on packaging/upgrade) | ✅ `%LOCALAPPDATA%\BiliLearn` (packaged artifact contains zero private data, survives upgrades) |
