@@ -95,7 +95,8 @@ if _missing_core_deps:
     logger.error(
         "⚠️ AstrBot 核心提供的依赖缺失或版本过低: "
         + "; ".join(_missing_core_deps)
-        + "。插件已不再声明这些包，请将 AstrBot 升级至 4.29.1 及以上后重新安装插件。"
+        + "。插件已不再声明这些包，请将 AstrBot 升级至 4.29.1 及以上后重新安装插件；"
+          "修复后可直接重新发送 /bili_start，无需重启 AstrBot。"
     )
 
 _brain_task: asyncio.Task | None = None
@@ -197,12 +198,15 @@ class BilibiliLearningBot(Star):
     @filter.command("bili_start")
     async def start_bot(self, event: AstrMessageEvent):
         """在后台启动 B站学习机器人。"""
-        global _brain_task
+        global _brain_task, _missing_core_deps
+        # 每次启动前重新检查，而不是只用导入期快照：用户装好依赖后无需重启核心。
+        _missing_core_deps = _check_core_dependencies()
         if _missing_core_deps:
             yield event.plain_result(
                 "❌ AstrBot 核心提供的依赖缺失或版本过低: "
                 + "; ".join(_missing_core_deps)
-                + "。请将 AstrBot 升级至 4.29.1 及以上后重新安装插件。"
+                + "。请将 AstrBot 升级至 4.29.1 及以上后重新安装插件；"
+                  "修复后可直接重新发送 /bili_start，无需重启 AstrBot。"
             )
             return
         async with _brain_task_lock:
