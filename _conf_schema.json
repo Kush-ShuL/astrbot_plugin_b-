@@ -1,0 +1,1330 @@
+{
+  "subtitles": {
+    "description": "字幕功能设置",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "启用字幕",
+        "type": "bool",
+        "default": true
+      }
+    }
+  },
+  "ai_permissions": {
+    "description": "AI权限控制",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "启用AI权限系统",
+        "type": "bool",
+        "default": false
+      },
+      "actions": {
+        "description": "具体操作权限配置",
+        "type": "object",
+        "items": {}
+      }
+    }
+  },
+  "rag_qa": {
+    "description": "检索增强问答设置",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "启用RAG问答",
+        "type": "bool",
+        "default": false
+      },
+      "model": {
+        "description": "使用的模型（auto为自动选择）",
+        "type": "string",
+        "default": "auto"
+      },
+      "max_context_chunks": {
+        "description": "最大上下文块数量",
+        "type": "int",
+        "default": 5
+      },
+      "enable_function_calling": {
+        "description": "启用函数调用",
+        "type": "bool",
+        "default": true
+      },
+      "sources": {
+        "description": "RAG数据来源",
+        "type": "list",
+        "default": ["knowledge_base", "single_video"]
+      },
+      "embedding_model": {
+        "description": "嵌入模型名称",
+        "type": "string",
+        "default": ""
+      },
+      "reranker_model": {
+        "description": "重排序模型名称",
+        "type": "string",
+        "default": ""
+      },
+      "allow_lexical_fallback": {
+        "description": "允许词法回退",
+        "type": "bool",
+        "default": true
+      },
+      "chunk_size": {
+        "description": "文本分块大小",
+        "type": "int",
+        "default": 900
+      },
+      "chunk_overlap": {
+        "description": "分块重叠长度",
+        "type": "int",
+        "default": 120
+      },
+      "candidate_count": {
+        "description": "候选数量",
+        "type": "int",
+        "default": 30
+      },
+      "context_chars": {
+        "description": "上下文字符数限制",
+        "type": "int",
+        "default": 6000
+      }
+    }
+  },
+  "subtitle_alignment": {
+    "description": "字幕对齐设置",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "启用字幕对齐",
+        "type": "bool",
+        "default": true
+      },
+      "embedding_model": {
+        "description": "对齐用嵌入模型",
+        "type": "string",
+        "default": ""
+      },
+      "threshold": {
+        "description": "对齐阈值",
+        "type": "float",
+        "default": 0.25
+      },
+      "chunk_size": {
+        "description": "分块大小",
+        "type": "int",
+        "default": 900
+      },
+      "fetch_attempts": {
+        "description": "获取尝试次数",
+        "type": "int",
+        "default": 3
+      },
+      "whisper_fallback": {
+        "description": "Whisper回退",
+        "type": "bool",
+        "default": true
+      }
+    }
+  },
+  "image_export": {
+    "description": "图片导出设置",
+    "type": "object",
+    "items": {
+      "width": {
+        "description": "宽度（像素）",
+        "type": "int",
+        "default": 1200
+      },
+      "height": {
+        "description": "高度（像素）",
+        "type": "int",
+        "default": 1600
+      },
+      "font_size": {
+        "description": "字体大小",
+        "type": "int",
+        "default": 32
+      },
+      "background": {
+        "description": "背景颜色（空为默认）",
+        "type": "string",
+        "default": ""
+      },
+      "overlay": {
+        "description": "覆盖层透明度",
+        "type": "float",
+        "default": 0.9
+      }
+    }
+  },
+  "model_provider": {
+    "description": "模型提供商插件",
+    "type": "object",
+    "items": {
+      "plugin": {
+        "description": "插件名称",
+        "type": "string",
+        "default": "openai-compatible"
+      }
+    }
+  },
+  "api": {
+    "description": "API连接设置",
+    "type": "object",
+    "items": {
+      "unified_api_key": {
+        "description": "统一API密钥",
+        "type": "string",
+        "default": "",
+        "secret": true
+      },
+      "max_retries": {
+        "description": "最大重试次数",
+        "type": "int",
+        "default": 3
+      },
+      "fallback_retries": {
+        "description": "回退重试次数",
+        "type": "int",
+        "default": 2
+      },
+      "unified_base_url": {
+        "description": "统一API基础地址",
+        "type": "string",
+        "default": "https://api.openai.com/v1"
+      },
+      "model_brain": {
+        "description": "核心推理模型",
+        "type": "string",
+        "default": "gpt-4.1-mini"
+      },
+      "model_vision": {
+        "description": "视觉模型",
+        "type": "string",
+        "default": "gpt-4.1-mini"
+      }
+    }
+  },
+  "model_presets": {
+    "description": "模型预设",
+    "type": "object",
+    "items": {
+      "gpt4o": {
+        "description": "GPT-4o预设",
+        "type": "object",
+        "items": {
+          "chat": {
+            "description": "对话模型",
+            "type": "string"
+          },
+          "vision": {
+            "description": "视觉模型",
+            "type": "string"
+          },
+          "fast": {
+            "description": "快速模型",
+            "type": "string"
+          },
+          "base_url": {
+            "description": "基础地址",
+            "type": "string"
+          }
+        }
+      },
+      "claude": {
+        "description": "Claude预设",
+        "type": "object",
+        "items": {
+          "chat": {
+            "description": "对话模型",
+            "type": "string"
+          },
+          "vision": {
+            "description": "视觉模型",
+            "type": "string"
+          },
+          "fast": {
+            "description": "快速模型",
+            "type": "string"
+          },
+          "base_url": {
+            "description": "基础地址",
+            "type": "string"
+          }
+        }
+      },
+      "gemini": {
+        "description": "Gemini预设",
+        "type": "object",
+        "items": {
+          "chat": {
+            "description": "对话模型",
+            "type": "string"
+          },
+          "vision": {
+            "description": "视觉模型",
+            "type": "string"
+          },
+          "fast": {
+            "description": "快速模型",
+            "type": "string"
+          },
+          "base_url": {
+            "description": "基础地址",
+            "type": "string"
+          }
+        }
+      },
+      "deepseek": {
+        "description": "DeepSeek预设",
+        "type": "object",
+        "items": {
+          "chat": {
+            "description": "对话模型",
+            "type": "string"
+          },
+          "vision": {
+            "description": "视觉模型",
+            "type": "string"
+          },
+          "fast": {
+            "description": "快速模型",
+            "type": "string"
+          },
+          "base_url": {
+            "description": "基础地址",
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "active_preset": {
+    "description": "当前激活的预设",
+    "type": "string",
+    "default": ""
+  },
+  "models": {
+    "description": "模型选择",
+    "type": "object",
+    "items": {
+      "chat": {
+        "description": "对话模型",
+        "type": "string"
+      },
+      "vision": {
+        "description": "视觉模型",
+        "type": "string"
+      },
+      "image": {
+        "description": "图像生成模型",
+        "type": "string"
+      },
+      "fast": {
+        "description": "快速模型",
+        "type": "string"
+      },
+      "embedding": {
+        "description": "嵌入模型",
+        "type": "string"
+      }
+    }
+  },
+  "fallback_models": {
+    "description": "降级模型选择",
+    "type": "object",
+    "items": {
+      "chat": {
+        "description": "对话模型",
+        "type": "string"
+      },
+      "vision": {
+        "description": "视觉模型",
+        "type": "string"
+      },
+      "image": {
+        "description": "图像生成模型",
+        "type": "string"
+      },
+      "fast": {
+        "description": "快速模型",
+        "type": "string"
+      },
+      "embedding": {
+        "description": "嵌入模型",
+        "type": "string"
+      }
+    }
+  },
+  "fallback_provider": {
+    "description": "跨API服务商降级设置",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "启用降级提供商",
+        "type": "bool",
+        "default": false
+      },
+      "name": {
+        "description": "提供商名称",
+        "type": "string",
+        "default": "chatanywhere"
+      },
+      "api_key": {
+        "description": "API密钥",
+        "type": "string",
+        "default": "",
+        "secret": true
+      },
+      "base_url": {
+        "description": "基础地址",
+        "type": "string",
+        "default": "https://api.chatanywhere.tech/v1"
+      },
+      "models": {
+        "description": "模型配置",
+        "type": "object",
+        "items": {
+          "chat": {
+            "description": "对话模型",
+            "type": "string"
+          },
+          "vision": {
+            "description": "视觉模型",
+            "type": "string"
+          },
+          "fast": {
+            "description": "快速模型",
+            "type": "string"
+          },
+          "embedding": {
+            "description": "嵌入模型",
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "web": {
+    "description": "Web服务设置",
+    "type": "object",
+    "items": {
+      "password": {
+        "description": "Web访问密码",
+        "type": "string",
+        "default": "",
+        "secret": true
+      }
+    }
+  },
+  "bilibili": {
+    "description": "Bilibili账户设置",
+    "type": "object",
+    "items": {
+      "owner_mid": {
+        "description": "主人MID",
+        "type": "string",
+        "default": ""
+      },
+      "refresh_token": {
+        "description": "刷新令牌",
+        "type": "string",
+        "default": "",
+        "secret": true
+      }
+    }
+  },
+  "automation": {
+    "description": "自动化行为设置",
+    "type": "object",
+    "items": {
+      "dry_run": {
+        "description": "试运行模式",
+        "type": "bool",
+        "default": true
+      },
+      "max_daily_actions": {
+        "description": "每日最大操作数",
+        "type": "int",
+        "default": 20
+      },
+      "proactive_video_count": {
+        "description": "主动视频数量",
+        "type": "int",
+        "default": 3
+      },
+      "proactive_comment_count": {
+        "description": "主动评论数量",
+        "type": "int",
+        "default": 2
+      },
+      "proactive_times_count": {
+        "description": "主动次数",
+        "type": "int",
+        "default": 2
+      },
+      "sleep_start": {
+        "description": "休眠开始时间",
+        "type": "string",
+        "default": "02:00"
+      },
+      "sleep_end": {
+        "description": "休眠结束时间",
+        "type": "string",
+        "default": "08:00"
+      },
+      "allow_comment": {
+        "description": "允许评论",
+        "type": "bool",
+        "default": false
+      },
+      "allow_like": {
+        "description": "允许点赞",
+        "type": "bool",
+        "default": false
+      },
+      "allow_coin": {
+        "description": "允许投币",
+        "type": "bool",
+        "default": false
+      },
+      "allow_favorite": {
+        "description": "允许收藏",
+        "type": "bool",
+        "default": false
+      },
+      "allow_dynamic": {
+        "description": "允许动态",
+        "type": "bool",
+        "default": false
+      },
+      "enable_web_search": {
+        "description": "启用网络搜索",
+        "type": "bool",
+        "default": true
+      },
+      "enable_proactive": {
+        "description": "启用主动行为",
+        "type": "bool",
+        "default": true
+      },
+      "enable_dynamic": {
+        "description": "启用动态功能",
+        "type": "bool",
+        "default": true
+      },
+      "enable_personality_evolution": {
+        "description": "启用性格进化",
+        "type": "bool",
+        "default": true
+      },
+      "enable_mood": {
+        "description": "启用情绪系统",
+        "type": "bool",
+        "default": true
+      },
+      "enable_affection": {
+        "description": "启用好感度系统",
+        "type": "bool",
+        "default": true
+      },
+      "enable_embedding_memory": {
+        "description": "启用嵌入记忆",
+        "type": "bool",
+        "default": true
+      },
+      "comment_poll_interval": {
+        "description": "评论轮询间隔（秒）",
+        "type": "int",
+        "default": 300
+      },
+      "max_replies_per_check": {
+        "description": "每次检查最大回复数",
+        "type": "int",
+        "default": 3
+      }
+    }
+  },
+  "video": {
+    "description": "视频处理设置",
+    "type": "object",
+    "items": {
+      "browse_mode": {
+        "description": "浏览模式",
+        "type": "string",
+        "default": "candidate_review"
+      },
+      "mode": {
+        "description": "处理模式",
+        "type": "string",
+        "default": "smart"
+      },
+      "max_duration_seconds": {
+        "description": "最大时长（秒）",
+        "type": "int",
+        "default": 900
+      },
+      "frame_count": {
+        "description": "帧数",
+        "type": "int",
+        "default": 12
+      },
+      "download_interest_threshold": {
+        "description": "下载兴趣阈值",
+        "type": "float",
+        "default": 7.0
+      },
+      "download_dir": {
+        "description": "下载目录",
+        "type": "string",
+        "default": ""
+      },
+      "delete_video_after_understand": {
+        "description": "理解后删除视频",
+        "type": "bool",
+        "default": true
+      },
+      "frame_note_mode": {
+        "description": "帧笔记模式",
+        "type": "string",
+        "default": "visual_note"
+      },
+      "candidate_pool_size": {
+        "description": "候选池大小",
+        "type": "int",
+        "default": 20
+      },
+      "visual_note_frame_interval": {
+        "description": "视觉笔记帧间隔",
+        "type": "int",
+        "default": 5
+      },
+      "visual_note_max_frames": {
+        "description": "视觉笔记最大帧数",
+        "type": "int",
+        "default": 240
+      },
+      "visual_note_grid_cols": {
+        "description": "视觉笔记网格列数",
+        "type": "int",
+        "default": 4
+      },
+      "visual_note_grid_rows": {
+        "description": "视觉笔记网格行数",
+        "type": "int",
+        "default": 3
+      },
+      "visual_note_scene_detection": {
+        "description": "视觉笔记场景检测",
+        "type": "bool",
+        "default": true
+      },
+      "visual_note_scene_threshold": {
+        "description": "场景检测阈值",
+        "type": "float",
+        "default": 0.3
+      },
+      "quality": {
+        "description": "视频质量",
+        "type": "string",
+        "default": "best"
+      },
+      "max_age_days": {
+        "description": "最大天数",
+        "type": "int",
+        "default": 180
+      },
+      "max_duration_limit_seconds": {
+        "description": "最大时长限制（秒）",
+        "type": "int",
+        "default": 18000
+      }
+    }
+  },
+  "direct_video": {
+    "description": "直接视频处理设置",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "启用直接视频处理",
+        "type": "bool",
+        "default": false
+      },
+      "capability_confirmed": {
+        "description": "能力确认",
+        "type": "bool",
+        "default": false
+      },
+      "model": {
+        "description": "使用的模型",
+        "type": "string",
+        "default": ""
+      },
+      "use_vision_endpoint": {
+        "description": "使用视觉端点",
+        "type": "bool",
+        "default": true
+      },
+      "max_size_mb": {
+        "description": "最大大小（MB）",
+        "type": "int",
+        "default": 32
+      },
+      "max_duration_seconds": {
+        "description": "最大时长（秒）",
+        "type": "int",
+        "default": 300
+      },
+      "timeout_seconds": {
+        "description": "超时时间（秒）",
+        "type": "int",
+        "default": 180
+      },
+      "max_tokens": {
+        "description": "最大Token数",
+        "type": "int",
+        "default": 2000
+      },
+      "fallback_to_frames": {
+        "description": "回退到帧处理",
+        "type": "bool",
+        "default": true
+      }
+    }
+  },
+  "prompt_injection": {
+    "description": "提示注入设置",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "启用提示注入",
+        "type": "bool",
+        "default": true
+      },
+      "custom_terms": {
+        "description": "自定义术语",
+        "type": "list",
+        "default": []
+      }
+    }
+  },
+  "api_pool": {
+    "description": "API池设置",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "启用API池",
+        "type": "bool",
+        "default": false
+      },
+      "include_primary": {
+        "description": "包含主API",
+        "type": "bool",
+        "default": true
+      },
+      "strategy": {
+        "description": "调度策略",
+        "type": "string",
+        "default": "round_robin"
+      },
+      "rounds": {
+        "description": "轮次",
+        "type": "int",
+        "default": 2
+      },
+      "attempt_limit": {
+        "description": "尝试限制",
+        "type": "int",
+        "default": 20
+      },
+      "total_timeout_seconds": {
+        "description": "总超时（秒）",
+        "type": "int",
+        "default": 300
+      },
+      "retry_delay_seconds": {
+        "description": "重试延迟（秒）",
+        "type": "int",
+        "default": 1
+      },
+      "backoff_multiplier": {
+        "description": "退避乘数",
+        "type": "float",
+        "default": 2
+      },
+      "max_delay_seconds": {
+        "description": "最大延迟（秒）",
+        "type": "int",
+        "default": 15
+      },
+      "failure_threshold": {
+        "description": "失败阈值",
+        "type": "int",
+        "default": 2
+      },
+      "cooldown_seconds": {
+        "description": "冷却时间（秒）",
+        "type": "int",
+        "default": 60
+      },
+      "respect_retry_after": {
+        "description": "遵守Retry-After",
+        "type": "bool",
+        "default": true
+      },
+      "retry_network_errors": {
+        "description": "重试网络错误",
+        "type": "bool",
+        "default": true
+      },
+      "retry_statuses": {
+        "description": "重试状态码",
+        "type": "list",
+        "default": [408, 429, 500, 502, 503, 504]
+      },
+      "failover_statuses": {
+        "description": "故障转移状态码",
+        "type": "list",
+        "default": [401, 402, 403, 404, 408, 429, 500, 502, 503, 504]
+      },
+      "endpoints": {
+        "description": "端点列表",
+        "type": "list",
+        "default": []
+      }
+    }
+  },
+  "vision": {
+    "description": "视觉功能设置",
+    "type": "object",
+    "items": {
+      "multimodal_enabled": {
+        "description": "启用多模态",
+        "type": "bool",
+        "default": false
+      },
+      "cover_enabled": {
+        "description": "启用封面分析",
+        "type": "bool",
+        "default": true
+      },
+      "frames_enabled": {
+        "description": "启用帧分析",
+        "type": "bool",
+        "default": true
+      },
+      "comment_images_enabled": {
+        "description": "启用评论图片分析",
+        "type": "bool",
+        "default": true
+      },
+      "analyze_frames_with_sufficient_subtitles": {
+        "description": "字幕充足时分析帧",
+        "type": "bool",
+        "default": false
+      },
+      "frame_count": {
+        "description": "分析帧数",
+        "type": "int",
+        "default": 8
+      }
+    }
+  },
+  "approval_review": {
+    "description": "审批复核设置",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "启用审批复核",
+        "type": "bool",
+        "default": true
+      },
+      "action_types": {
+        "description": "需要审批的操作类型",
+        "type": "object",
+        "items": {
+          "video_like": {
+            "description": "视频点赞",
+            "type": "bool",
+            "default": true
+          },
+          "follow_up": {
+            "description": "关注UP主",
+            "type": "bool",
+            "default": true
+          },
+          "send_danmaku": {
+            "description": "发送弹幕",
+            "type": "bool",
+            "default": true
+          },
+          "public_comment": {
+            "description": "公开评论",
+            "type": "bool",
+            "default": true
+          },
+          "private_reply": {
+            "description": "私信回复",
+            "type": "bool",
+            "default": true
+          },
+          "coin": {
+            "description": "投币",
+            "type": "bool",
+            "default": true
+          },
+          "favorite": {
+            "description": "收藏",
+            "type": "bool",
+            "default": true
+          },
+          "knowledge_write": {
+            "description": "知识写入",
+            "type": "bool",
+            "default": true
+          },
+          "file_export": {
+            "description": "文件导出",
+            "type": "bool",
+            "default": true
+          }
+        }
+      }
+    }
+  },
+  "up_learning": {
+    "description": "UP主学习设置",
+    "type": "object",
+    "items": {
+      "per_video_timeout_seconds": {
+        "description": "每个视频超时时间（秒）",
+        "type": "int",
+        "default": 600
+      }
+    }
+  },
+  "reply_safety": {
+    "description": "回复安全设置",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "启用回复安全",
+        "type": "bool",
+        "default": true
+      },
+      "block_on_incoming": {
+        "description": "拦截传入",
+        "type": "bool",
+        "default": true
+      },
+      "block_on_outgoing": {
+        "description": "拦截传出",
+        "type": "bool",
+        "default": true
+      },
+      "block_political_video_comments": {
+        "description": "拦截政治视频评论",
+        "type": "bool",
+        "default": true
+      },
+      "blocked_keywords": {
+        "description": "屏蔽关键词列表",
+        "type": "list",
+        "default": [
+          "主席", "党", "国家", "政治", "政府", "共产党", "中共", "习近平", "毛泽东", "人大", "国务院", "军委", "台湾", "香港", "新疆", "西藏", "六四", "法轮", "选举", "民主", "独裁", "宪法", "外交部", "制裁", "战争", "俄乌", "以色列", "巴勒斯坦", "靖国神社", "民族主义", "辱华", "台独", "港独", "藏独", "疆独", "抗议", "游行", "维权", "人权", "警察", "军队", "解放军", "武统", "一国两制"
+        ]
+      }
+    }
+  },
+  "diary": {
+    "description": "日记生成设置",
+    "type": "object",
+    "items": {
+      "schedule_version": {
+        "description": "计划版本",
+        "type": "int",
+        "default": 1
+      },
+      "enabled": {
+        "description": "启用日记",
+        "type": "bool",
+        "default": true
+      },
+      "auto_enabled": {
+        "description": "启用自动日记",
+        "type": "bool",
+        "default": true
+      },
+      "trigger_mode": {
+        "description": "触发模式",
+        "type": "string",
+        "default": "interval"
+      },
+      "auto_interval_minutes": {
+        "description": "自动间隔（分钟）",
+        "type": "int",
+        "default": 1440
+      },
+      "daily_time": {
+        "description": "每日时间",
+        "type": "string",
+        "default": "22:00"
+      },
+      "time_windows": {
+        "description": "时间窗口",
+        "type": "list",
+        "default": []
+      },
+      "weekdays": {
+        "description": "星期几",
+        "type": "list",
+        "default": [0, 1, 2, 3, 4, 5, 6]
+      },
+      "min_events_for_auto": {
+        "description": "自动触发最小事件数",
+        "type": "int",
+        "default": 1
+      },
+      "event_threshold": {
+        "description": "事件阈值",
+        "type": "int",
+        "default": 20
+      },
+      "lookback_hours": {
+        "description": "回溯小时数",
+        "type": "int",
+        "default": 24
+      },
+      "sources": {
+        "description": "事件来源",
+        "type": "list",
+        "default": ["learning", "videos", "web_chat", "private_messages", "comments"]
+      },
+      "max_events": {
+        "description": "最大事件数",
+        "type": "int",
+        "default": 100
+      },
+      "max_chars_per_source": {
+        "description": "每个来源最大字符数",
+        "type": "int",
+        "default": 6000
+      },
+      "max_total_chars": {
+        "description": "总最大字符数",
+        "type": "int",
+        "default": 24000
+      },
+      "include_skipped": {
+        "description": "包含跳过的事件",
+        "type": "bool",
+        "default": false
+      },
+      "include_blocked": {
+        "description": "包含拦截的事件",
+        "type": "bool",
+        "default": false
+      },
+      "anonymize_contacts": {
+        "description": "匿名化联系人",
+        "type": "bool",
+        "default": true
+      },
+      "empty_behavior": {
+        "description": "空行为处理",
+        "type": "string",
+        "default": "skip"
+      },
+      "fallback_to_local": {
+        "description": "回退到本地",
+        "type": "bool",
+        "default": false
+      },
+      "retry_minutes": {
+        "description": "重试分钟数",
+        "type": "int",
+        "default": 30
+      },
+      "model": {
+        "description": "模型",
+        "type": "string",
+        "default": ""
+      },
+      "temperature": {
+        "description": "温度",
+        "type": "float",
+        "default": 0.4
+      },
+      "max_tokens": {
+        "description": "最大Token数",
+        "type": "int",
+        "default": 1500
+      },
+      "ai_timeout_seconds": {
+        "description": "AI超时（秒）",
+        "type": "int",
+        "default": 180
+      },
+      "custom_prompt": {
+        "description": "自定义提示词",
+        "type": "text",
+        "default": ""
+      },
+      "title_prefix": {
+        "description": "标题前缀",
+        "type": "string",
+        "default": "今日手记"
+      }
+    }
+  },
+  "self_evolution": {
+    "description": "自我进化设置",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "启用自我进化",
+        "type": "bool",
+        "default": false
+      },
+      "auto_enabled": {
+        "description": "启用自动进化",
+        "type": "bool",
+        "default": false
+      },
+      "auto_apply": {
+        "description": "自动应用",
+        "type": "bool",
+        "default": false
+      },
+      "reflect_interval_events": {
+        "description": "反思间隔事件数",
+        "type": "int",
+        "default": 100
+      },
+      "min_events_for_reflect": {
+        "description": "反思最小事件数",
+        "type": "int",
+        "default": 3
+      },
+      "layers": {
+        "description": "进化层次",
+        "type": "list",
+        "default": ["parameters", "knowledge", "strategy"]
+      },
+      "sources": {
+        "description": "来源",
+        "type": "list",
+        "default": ["videos", "learning", "diary"]
+      },
+      "observation_hours": {
+        "description": "观察小时数",
+        "type": "int",
+        "default": 336
+      },
+      "auto_apply_parameters": {
+        "description": "自动应用参数",
+        "type": "bool",
+        "default": false
+      }
+    }
+  },
+  "agent": {
+    "description": "代理设置",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "启用代理",
+        "type": "bool",
+        "default": true
+      },
+      "auto_enabled": {
+        "description": "启用自动代理",
+        "type": "bool",
+        "default": true
+      },
+      "max_steps_per_plan": {
+        "description": "每计划最大步数",
+        "type": "int",
+        "default": 5
+      },
+      "max_search_results": {
+        "description": "最大搜索结果数",
+        "type": "int",
+        "default": 8
+      },
+      "max_videos_per_plan": {
+        "description": "每计划最大视频数",
+        "type": "int",
+        "default": 5
+      },
+      "auto_min_score": {
+        "description": "自动最小分数",
+        "type": "float",
+        "default": 7.5
+      },
+      "cooldown_minutes": {
+        "description": "冷却时间（分钟）",
+        "type": "int",
+        "default": 60
+      },
+      "deep_learning_enabled": {
+        "description": "启用深度学习",
+        "type": "bool",
+        "default": true
+      },
+      "deep_learning_max_videos": {
+        "description": "深度学习最大视频数",
+        "type": "int",
+        "default": 2
+      },
+      "deep_learning_timeout_seconds": {
+        "description": "深度学习超时（秒）",
+        "type": "int",
+        "default": 180
+      }
+    }
+  },
+  "learning_workflow": {
+    "description": "学习工作流设置",
+    "type": "object",
+    "items": {
+      "read_comments": {
+        "description": "读取评论",
+        "type": "bool",
+        "default": true
+      },
+      "read_danmaku": {
+        "description": "读取弹幕",
+        "type": "bool",
+        "default": true
+      }
+    }
+  },
+  "behavior": {
+    "description": "行为设置",
+    "type": "object",
+    "items": {
+      "ai_marker": {
+        "description": "AI标记文本",
+        "type": "string",
+        "default": "（内容由AI生成并由AI回复）"
+      },
+      "private_reply_cooldown_minutes": {
+        "description": "私信回复冷却（分钟）",
+        "type": "int",
+        "default": 3
+      },
+      "comment_user_cooldown_minutes": {
+        "description": "评论用户冷却（分钟）",
+        "type": "int",
+        "default": 60
+      },
+      "max_consecutive_ai_replies": {
+        "description": "最大连续AI回复数",
+        "type": "int",
+        "default": 3
+      },
+      "min_reply_delay_seconds": {
+        "description": "最小回复延迟（秒）",
+        "type": "int",
+        "default": 4
+      },
+      "max_reply_delay_seconds": {
+        "description": "最大回复延迟（秒）",
+        "type": "int",
+        "default": 18
+      },
+      "prefer_short_replies": {
+        "description": "偏好简短回复",
+        "type": "bool",
+        "default": true
+      }
+    }
+  },
+  "session": {
+    "description": "会话设置",
+    "type": "object",
+    "items": {
+      "max_videos": {
+        "description": "最大视频数",
+        "type": "int",
+        "default": 0
+      },
+      "max_learned_videos": {
+        "description": "最大已学习视频数",
+        "type": "int",
+        "default": 0
+      },
+      "max_duration_minutes": {
+        "description": "最大时长（分钟）",
+        "type": "int",
+        "default": 0
+      },
+      "completion_action": {
+        "description": "完成操作",
+        "type": "string",
+        "default": "stop"
+      }
+    }
+  },
+  "revisit": {
+    "description": "回访设置",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "启用回访",
+        "type": "bool",
+        "default": false
+      },
+      "rules_confirmed": {
+        "description": "规则已确认",
+        "type": "bool",
+        "default": false
+      },
+      "sources": {
+        "description": "来源",
+        "type": "list",
+        "default": ["history", "local_favorites"]
+      },
+      "time_windows": {
+        "description": "时间窗口",
+        "type": "list",
+        "default": []
+      },
+      "weekdays": {
+        "description": "星期几",
+        "type": "list",
+        "default": [0, 1, 2, 3, 4, 5, 6]
+      },
+      "categories": {
+        "description": "分类",
+        "type": "list",
+        "default": []
+      },
+      "keywords": {
+        "description": "关键词",
+        "type": "list",
+        "default": []
+      },
+      "exclude_keywords": {
+        "description": "排除关键词",
+        "type": "list",
+        "default": []
+      },
+      "up_names": {
+        "description": "UP主名称",
+        "type": "list",
+        "default": []
+      },
+      "favorite": {
+        "description": "收藏",
+        "type": "bool",
+        "default": true
+      }
+    }
+  }
+ }
+}
+}
