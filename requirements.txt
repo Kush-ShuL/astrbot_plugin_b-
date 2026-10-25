@@ -1,7 +1,26 @@
 # ============================================================
 # bilibili_learning_bot v3.1.2 依赖清单
 # ============================================================
-# ⚠️ 版本已锁定为开发者环境精确版本，保证兼容性。
+# ⚠️ 本文件只声明插件**专属**依赖。
+#
+#    与 AstrBot 核心重叠的依赖（openai / pydantic / httpx[socks] /
+#    pillow / qrcode / python-docx / reportlab）已从本文件移除：
+#    这些包由 AstrBot 核心统一提供并受核心依赖保护机制管控，插件
+#    重复声明（无论精确锁定还是区间）都会与之产生版本冲突，导致
+#    安装被拦截（见 issues #18 / #20）。
+#    核心 v4.29.1 的 requirements.txt 已声明：
+#      openai>=1.78.0 / pydantic>=2.12.5 / httpx[socks]>=0.28.1 /
+#      pillow>=11.2.1 / qrcode>=8.2 / python-docx>=1.2.0 / reportlab>=5.0.0
+#    插件仅使用其中稳定的公开 API（如 openai 的 client.chat.completions.create），
+#    不依赖核心未覆盖的版本特性。
+#
+#    Flask / flask-cors / requests 等不在核心 requirements.txt 中，但常被
+#    核心的间接依赖或其他插件引入。这里统一使用兼容区间而非精确锁定，
+#    避免核心升级时再次触发依赖保护拦截。
+#
+# 最低支持的核心版本见 metadata.yaml 的 astrbot_version: ">=4.16,<5"。
+# 在更旧的核心（未提供上述 7 个包）上安装时，插件初始化会输出明确的
+# 依赖缺失提示，建议升级 AstrBot 至 4.29.1 及以上。
 #
 # 🔧 Termux (Android) 用户：
 #    PyYAML 是 bilibili-api-python 的间接依赖，会由 pip 自动安装。
@@ -9,22 +28,15 @@
 #      pkg install libyaml libyaml-dev python python-pip
 #    然后再执行 pip install -r requirements.txt
 
-bilibili-api-python==17.4.1
-openai==2.33.0
-pydantic>=2.0.0
-httpx==0.28.1
-colorama==0.4.6
-qrcode==8.2
-qrcode-terminal==0.8
-Pillow==12.1.0
-pystray==0.19.5
-Flask==3.1.2
-flask-cors==6.0.2
-requests==2.32.5
-imageio-ffmpeg==0.6.0
+bilibili-api-python>=17.4.1,<18
+colorama>=0.4.6,<1
+qrcode-terminal>=0.8,<1
+pystray>=0.19.5,<1
+Flask>=3.0,<4
+flask-cors>=4.0,<7
+requests>=2.31,<3
+imageio-ffmpeg>=0.6.0,<1
 yt-dlp>=2025.6.30
-python-docx>=1.1.2
-reportlab>=4.2.5
 
 # Optional: ASR 语音识别
 # funasr==1.3.1

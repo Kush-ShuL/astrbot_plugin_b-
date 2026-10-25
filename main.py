@@ -31,6 +31,42 @@ from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star
 
+# AstrBot 核心提供的依赖（插件 requirements.txt 不再声明，见 issues #18/#20）。
+# 缺失时输出明确提示，避免用户只看到裸 ImportError。
+_CORE_PROVIDED_DEPENDENCIES = {
+    "openai": "openai",
+    "pydantic": "pydantic",
+    "httpx": "httpx[socks]",
+    "qrcode": "qrcode",
+    "docx": "python-docx",
+    "reportlab": "reportlab",
+    "PIL": "pillow",
+}
+
+
+def _check_core_dependencies() -> list[str]:
+    """检查核心应提供的依赖是否可导入。
+
+    Returns:
+        list[str]: 缺失依赖的 pip 包名列表。
+    """
+    missing = []
+    for module_name, package_name in _CORE_PROVIDED_DEPENDENCIES.items():
+        try:
+            __import__(module_name)
+        except ImportError:
+            missing.append(package_name)
+    return missing
+
+
+_missing_core_deps = _check_core_dependencies()
+if _missing_core_deps:
+    logger.error(
+        "⚠️ 缺少 AstrBot 核心应提供的依赖: "
+        + ", ".join(_missing_core_deps)
+        + "。插件已不再声明这些包，请将 AstrBot 升级至 4.29.1 及以上后重新安装插件。"
+    )
+
 _brain_task: asyncio.Task | None = None
 """后台运行的 AgentBrain 任务，None 表示当前没有任务。"""
 
@@ -131,6 +167,13 @@ class BilibiliLearningBot(Star):
     async def start_bot(self, event: AstrMessageEvent):
         """在后台启动 B站学习机器人。"""
         global _brain_task
+        if _missing_core_deps:
+            yield event.plain_result(
+                "❌ 缺少 AstrBot 核心应提供的依赖: "
+                + ", ".join(_missing_core_deps)
+                + "。请将 AstrBot 升级至 4.29.1 及以上后重新安装插件。"
+            )
+            return
         async with _brain_task_lock:
             if _brain_stopping:
                 yield event.plain_result("⏳ 机器人正在停止中，请稍后再启动。")
