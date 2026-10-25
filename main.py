@@ -26,44 +26,75 @@ from __future__ import annotations
 import asyncio
 import sys
 import traceback
+from importlib import metadata as importlib_metadata
 
 from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star
 
 # AstrBot 核心提供的依赖（插件 requirements.txt 不再声明，见 issues #18/#20）。
-# 缺失时输出明确提示，避免用户只看到裸 ImportError。
+# 值依次为 pip 包名（用于提示）与核心 v4.29.1 声明的最低版本。
 _CORE_PROVIDED_DEPENDENCIES = {
-    "openai": "openai",
-    "pydantic": "pydantic",
-    "httpx": "httpx[socks]",
-    "qrcode": "qrcode",
-    "docx": "python-docx",
-    "reportlab": "reportlab",
-    "PIL": "pillow",
+    "openai": ("openai", "1.78.0"),
+    "pydantic": ("pydantic", "2.12.5"),
+    "httpx": ("httpx[socks]", "0.28.1"),
+    "qrcode": ("qrcode", "8.2"),
+    "docx": ("python-docx", "1.2.0"),
+    "reportlab": ("reportlab", "5.0.0"),
+    "PIL": ("pillow", "11.2.1"),
 }
 
 
+def _version_tuple(version: str, length: int = 4) -> tuple[int, ...]:
+    """把版本号转成可比较的整数元组，忽略预发布/本地版本后缀。"""
+    parts = []
+    for chunk in version.split("."):
+        digits = ""
+        for char in chunk:
+            if not char.isdigit():
+                break
+            digits += char
+        parts.append(int(digits) if digits else 0)
+    return tuple(parts[:length] + [0] * (length - len(parts)))
+
+
 def _check_core_dependencies() -> list[str]:
-    """检查核心应提供的依赖是否可导入。
+    """校验核心应提供的依赖是否可用且满足最低版本。
 
     Returns:
-        list[str]: 缺失依赖的 pip 包名列表。
+        list[str]: 缺失或版本过低依赖的说明列表。
     """
-    missing = []
-    for module_name, package_name in _CORE_PROVIDED_DEPENDENCIES.items():
+    problems = []
+    for module_name, (package_name, minimum) in _CORE_PROVIDED_DEPENDENCIES.items():
         try:
             __import__(module_name)
         except ImportError:
-            missing.append(package_name)
-    return missing
+            problems.append(f"{package_name}（缺失，需要 >={minimum}）")
+            continue
+
+        dist_name = package_name.split("[")[0]
+        try:
+            installed = importlib_metadata.version(dist_name)
+        except importlib_metadata.PackageNotFoundError:
+            problems.append(f"{package_name}（无法确定版本，需要 >={minimum}）")
+            continue
+        if _version_tuple(installed) < _version_tuple(minimum):
+            problems.append(f"{package_name}（已安装 {installed}，需要 >={minimum}）")
+
+    # httpx 可导入不代表 SOCKS 代理可用：`httpx[socks]` 还需要 socksio。
+    try:
+        __import__("socksio")
+    except ImportError:
+        problems.append("httpx[socks]（缺少 socksio，SOCKS 代理不可用）")
+
+    return problems
 
 
 _missing_core_deps = _check_core_dependencies()
 if _missing_core_deps:
     logger.error(
-        "⚠️ 缺少 AstrBot 核心应提供的依赖: "
-        + ", ".join(_missing_core_deps)
+        "⚠️ AstrBot 核心提供的依赖缺失或版本过低: "
+        + "; ".join(_missing_core_deps)
         + "。插件已不再声明这些包，请将 AstrBot 升级至 4.29.1 及以上后重新安装插件。"
     )
 
@@ -169,8 +200,8 @@ class BilibiliLearningBot(Star):
         global _brain_task
         if _missing_core_deps:
             yield event.plain_result(
-                "❌ 缺少 AstrBot 核心应提供的依赖: "
-                + ", ".join(_missing_core_deps)
+                "❌ AstrBot 核心提供的依赖缺失或版本过低: "
+                + "; ".join(_missing_core_deps)
                 + "。请将 AstrBot 升级至 4.29.1 及以上后重新安装插件。"
             )
             return

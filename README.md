@@ -37,11 +37,12 @@
 
 ## 🧩 环境要求
 
-- **AstrBot 核心版本**：`>=4.16,<5`（见 `metadata.yaml` 的 `astrbot_version`），推荐 4.29.1 及以上。
+- **AstrBot 核心版本**：`>=4.29.1,<5`（见 `metadata.yaml` 的 `astrbot_version`），低于该版本会在安装期被核心拒绝。
 - **由核心提供的依赖**：`openai`、`pydantic`、`httpx[socks]`、`pillow`、`qrcode`、`python-docx`、`reportlab`。
   插件不再在 `requirements.txt` 中声明这些包（避免触发核心依赖保护机制，见 issues #18 / #20），
-  因此它们必须由 AstrBot 核心提供。若使用更旧的核心且缺少上述包，插件初始化时会输出明确的
-  依赖缺失日志，且 `/bili_start` 会拒绝启动并提示需要升级的核心版本，请升级 AstrBot 后重装插件。
+  因此它们必须由 AstrBot 核心提供。启动时会校验每个包的**导入、最低版本**（如 `openai>=1.78.0`、
+  `httpx[socks]>=0.28.1`）以及 SOCKS 代理所需的 `socksio`；任一不满足都会输出明确日志，
+  且 `/bili_start` 会拒绝启动并列出具体缺失项与版本要求，请升级 AstrBot 后重装插件。
 - **插件专属依赖**：见 `requirements.txt`，均使用兼容区间而非精确锁定。
 
 ---

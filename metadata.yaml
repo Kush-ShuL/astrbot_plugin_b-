@@ -5,7 +5,7 @@ desc: B站 AI 学习互动机器人 — AI 自动刷视频、学知识、评论�
 version: 3.1.2
 author: mjy1113451
 repo: https://github.com/mjy1113451/astrbot_plugin_b-
-astrbot_version: ">=4.16,<5"
+astrbot_version: ">=4.29.1,<5"
 support_platforms:
   - aiocqhttp
   - lark
