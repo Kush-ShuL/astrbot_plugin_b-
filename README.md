@@ -40,9 +40,12 @@
 - **AstrBot 核心版本**：`>=4.29.1,<5`（见 `metadata.yaml` 的 `astrbot_version`），低于该版本会在安装期被核心拒绝。
 - **由核心提供的依赖**：`openai`、`pydantic`、`httpx[socks]`、`pillow`、`qrcode`、`python-docx`、`reportlab`。
   插件不再在 `requirements.txt` 中声明这些包（避免触发核心依赖保护机制，见 issues #18 / #20），
-  因此它们必须由 AstrBot 核心提供。启动时会校验每个包的**导入、最低版本**（如 `openai>=1.78.0`、
-  `httpx[socks]>=0.28.1`）以及 SOCKS 代理所需的 `socksio`；任一不满足都会输出明确日志，
-  且 `/bili_start` 会拒绝启动并列出具体缺失项与版本要求，请升级 AstrBot 后重装插件。
+  因此它们必须由 AstrBot 核心提供。每次执行 `/bili_start` 都会校验必需包的**导入、最低版本**，
+  版本约束统一维护在 `main.py` 的 `_CORE_PROVIDED_DEPENDENCIES`，按 PEP 440 比较版本
+  （包括 epoch、预发布、开发及本地版本）。必需包缺失、版本过低或无法解析时，会拒绝启动并列出具体原因；
+  补齐依赖后可直接重新发送 `/bili_start`。
+- **SOCKS 代理（可选）**：缺少 `socksio` 时仅输出警告，不阻止直连或 HTTP 代理用户启动。
+  如需使用 SOCKS 代理，请先在 AstrBot 运行环境中安装 `httpx[socks]`，否则对应代理请求仍会失败。
 - **插件专属依赖**：见 `requirements.txt`，均使用兼容区间而非精确锁定。
 
 ---

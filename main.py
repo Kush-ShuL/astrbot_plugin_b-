@@ -37,25 +37,12 @@ from astrbot.api.star import Context, Star
 _CORE_PROVIDED_DEPENDENCIES = {
     "openai": ("openai", "1.78.0"),
     "pydantic": ("pydantic", "2.12.5"),
-    "httpx": ("httpx[socks]", "0.28.1"),
+    "httpx": ("httpx", "0.28.1"),
     "qrcode": ("qrcode", "8.2"),
     "docx": ("python-docx", "1.2.0"),
     "reportlab": ("reportlab", "5.0.0"),
     "PIL": ("pillow", "11.2.1"),
 }
-
-
-def _version_tuple(version: str, length: int = 4) -> tuple[int, ...]:
-    """把版本号转成可比较的整数元组，忽略预发布/本地版本后缀。"""
-    parts = []
-    for chunk in version.split("."):
-        digits = ""
-        for char in chunk:
-            if not char.isdigit():
-                break
-            digits += char
-        parts.append(int(digits) if digits else 0)
-    return tuple(parts[:length] + [0] * (length - len(parts)))
 
 
 def _check_core_dependencies() -> list[str]:
@@ -64,6 +51,11 @@ def _check_core_dependencies() -> list[str]:
     Returns:
         list[str]: 缺失或版本过低依赖的说明列表。
     """
+    try:
+        from packaging.version import InvalidVersion, Version
+    except ImportError:
+        return ["packaging（缺失，无法校验依赖版本，请修复 AstrBot 核心依赖）"]
+
     problems = []
     for module_name, (package_name, minimum) in _CORE_PROVIDED_DEPENDENCIES.items():
         try:
@@ -78,14 +70,20 @@ def _check_core_dependencies() -> list[str]:
         except importlib_metadata.PackageNotFoundError:
             problems.append(f"{package_name}（无法确定版本，需要 >={minimum}）")
             continue
-        if _version_tuple(installed) < _version_tuple(minimum):
-            problems.append(f"{package_name}（已安装 {installed}，需要 >={minimum}）")
+        try:
+            if Version(installed) < Version(minimum):
+                problems.append(f"{package_name}（已安装 {installed}，需要 >={minimum}）")
+        except InvalidVersion:
+            problems.append(f"{package_name}（无法解析版本 {installed!r}，需要 >={minimum}）")
 
-    # httpx 可导入不代表 SOCKS 代理可用：`httpx[socks]` 还需要 socksio。
+    # SOCKS 代理是可选功能，不能阻止直连或 HTTP 代理用户启动。
     try:
         __import__("socksio")
     except ImportError:
-        problems.append("httpx[socks]（缺少 socksio，SOCKS 代理不可用）")
+        logger.warning(
+            "⚠️ 可选依赖 socksio 缺失，SOCKS 代理不可用；直连和 HTTP 代理不受影响。"
+            "如需使用 SOCKS 代理，请在 AstrBot 运行环境中安装 httpx[socks]。"
+        )
 
     return problems
 
