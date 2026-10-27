@@ -333,7 +333,7 @@ class BrainSessionMixin:
 只返回要发送的内容，不要解释。
 """
             resp = await self._call_ai_with_retry(
-                model=MODEL_BRAIN,
+                model=self._live_config()["model_brain"],
                 messages=[
                     {"role": "system", "content": "你是B站上的一个普通用户。看了对方主页后再开口——围绕对方的投稿内容或签名展开话题。友好、有边界感、不油腻。"},
                     {"role": "user", "content": prompt}
@@ -661,7 +661,7 @@ class BrainSessionMixin:
             context = f"视频标题: {title}\n视频内容摘要: {subtitle_text[:200] if subtitle_text and '[未读取' not in subtitle_text else '未知'}"
             persona_block = self.persona_mgr.build_prompt_block()
             resp = await self._call_ai_with_retry(
-                model=MODEL_BRAIN,
+                model=self._live_config()["model_brain"],
                 messages=[
                     {"role": "system", "content": f"你是B站上的一个普通观众。{persona_block}请根据视频内容发送一条弹幕。要求：1. 简短（20字以内）2. 符合B站弹幕风格 3. 有趣或表达到位 4. 不要发送引战、敏感内容。只返回弹幕文字，不要解释。"},
                     {"role": "user", "content": f"为这个视频发一条弹幕: {context}"}

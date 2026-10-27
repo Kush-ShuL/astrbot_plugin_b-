@@ -254,7 +254,7 @@ class BrainVideoMixin:
             
             # 同时抽关键帧（复用已下载的视频，不再单独下载）
             vision_task = None
-            if do_vision and VISION_FRAMES_ENABLED and should_extract and not self._is_vision_globally_disabled():
+            if do_vision and config.get('vision', {}).get('frames_enabled', True) and should_extract and not self._is_vision_globally_disabled():
                 vision_task = asyncio.create_task(self._extract_and_analyze_frames(
                     video_path, bvid, title, subtitle_text, frame_count=smart_frame_count
                 ))
@@ -424,7 +424,7 @@ class BrainVideoMixin:
                         for b in grid_b64:
                             content_blocks.append({"type": "image_url", "image_url": {"url": b}})
                         resp = await self._call_ai_with_retry(
-                            model=MODEL_VISION,
+                            model=self._live_config()["model_vision"],
                             messages=[
                                 {"role": "system", "content": "你是视频图文笔记助手，必须同时参考画面证据和文本证据，输出带目录、带配图的 Markdown。"},
                                 {"role": "user", "content": content_blocks},
@@ -490,7 +490,7 @@ class BrainVideoMixin:
                 content_blocks.append({"type": "image_url", "image_url": {"url": data_url}})
             
             resp = await self._call_ai_with_retry(
-                model=MODEL_VISION,
+                model=self._live_config()["model_vision"],
                 messages=[{
                     "role": "system",
                     "content": "你是视频内容分析助手，通过关键帧截图理解视频。请仔细看每张图，综合判断内容。"
@@ -558,7 +558,7 @@ class BrainVideoMixin:
         )
         try:
             resp = await self._call_ai_with_retry(
-                model=MODEL_BRAIN,
+                model=self._live_config()["model_brain"],
                 messages=[{
                     "role": "system",
                     "content": "你是视频分析策略专家。只返回JSON。"
@@ -627,7 +627,7 @@ class BrainVideoMixin:
                 for data_url in grid_data_urls
             )
             response = await self._call_ai_with_retry(
-                model=MODEL_VISION,
+                model=self._live_config()["model_vision"],
                 messages=[
                     {
                         "role": "system",
@@ -749,7 +749,7 @@ class BrainVideoMixin:
                 content_blocks.append({"type": "image_url", "image_url": {"url": data_url}})
             # 4. 调用视觉模型
             resp = await self._call_ai_with_retry(
-                model=MODEL_VISION,
+                model=self._live_config()["model_vision"],
                 messages=[{
                     "role": "system",
                     "content": "你是视频内容分析助手，通过关键帧截图理解视频。请仔细看每张图，综合判断内容。"
@@ -824,7 +824,7 @@ class BrainVideoMixin:
         )
         try:
             resp = await self._call_ai_with_retry(
-                model=MODEL_BRAIN,
+                model=self._live_config()["model_brain"],
                 messages=[{"role": "user", "content": prompt}],
                 request_timeout=30
             )
@@ -863,7 +863,7 @@ class BrainVideoMixin:
         )
         try:
             resp = await self._call_ai_with_retry(
-                model=MODEL_BRAIN,
+                model=self._live_config()["model_brain"],
                 messages=[{"role": "user", "content": prompt}],
                 request_timeout=30
             )
@@ -948,7 +948,7 @@ class BrainVideoMixin:
         )
         try:
             resp = await self._call_ai_with_retry(
-                model=MODEL_BRAIN,
+                model=self._live_config()["model_brain"],
                 messages=[{"role": "user", "content": prompt}],
                 request_timeout=25
             )

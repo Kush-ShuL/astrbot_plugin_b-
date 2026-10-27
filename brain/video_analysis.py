@@ -104,7 +104,7 @@ async def _ai_cross_check_subtitle_match(brain, title: str, subtitle_text: str):
 
     try:
         resp = await brain._call_ai_with_retry(
-            model=MODEL_BRAIN,
+            model=brain._live_config()["model_brain"],
             messages=[{"role": "user", "content": check_prompt}],
             request_timeout=30
         )
@@ -199,7 +199,7 @@ async def analyze_bilibili_video_input(user_input: str, force_mode: str | None =
     learning_topic = title[:15] if title else "手动分析"
     try:
         resp = await brain._call_ai_with_retry(
-            model=MODEL_BRAIN,
+            model=brain._live_config()["model_brain"],
             messages=[{"role": "system", "content": objective_prompt}, {"role": "user", "content": context}],
             request_timeout=120,
         )
@@ -704,7 +704,7 @@ async def manual_video_analysis(force_platform: str | None = "bilibili"):
 
         try:
             resp = await brain._call_ai_with_retry(
-                model=MODEL_BRAIN,
+                model=brain._live_config()["model_brain"],
                 messages=[
                     {"role": "system", "content": objective_prompt},
                     {"role": "user", "content": context}
@@ -1046,7 +1046,7 @@ async def _one_sentence_agent(brain, bvid, title, up_name, video_url, aid=0):
         )
         context = f"视频标题: {title}\nUP主: {up_name}\n【字幕】: {subtitle_text[:2000]}\n{comment_text}\n{danmaku_text}"
         try:
-            resp = await brain._call_ai_with_retry(model=MODEL_BRAIN, messages=[{"role":"system","content":objective_prompt},{"role":"user","content":context}], request_timeout=120)
+            resp = await brain._call_ai_with_retry(model=brain._live_config()["model_brain"], messages=[{"role":"system","content":objective_prompt},{"role":"user","content":context}], request_timeout=120)
             raw = resp.choices[0].message.content
             start = raw.find("{")
             end = raw.rfind("}")
@@ -1069,7 +1069,7 @@ async def _one_sentence_agent(brain, bvid, title, up_name, video_url, aid=0):
     for _turn in range(MAX_AUTO_TURNS):
         print(f"{Fore.CYAN}[Agent] AI思考中...{Style.RESET_ALL}")
         try:
-            resp = await brain._call_ai_with_retry(model=MODEL_BRAIN, messages=messages, request_timeout=90)
+            resp = await brain._call_ai_with_retry(model=brain._live_config()["model_brain"], messages=messages, request_timeout=90)
             ai_text = resp.choices[0].message.content
         except Exception as e:
             print(f"{Fore.RED}[Agent] AI调用失败: {e}{Style.RESET_ALL}")
@@ -1320,7 +1320,7 @@ async def _agent_video_analysis(brain, bvid, title, up_name, video_url, aid=0):
 
         try:
             resp = await brain._call_ai_with_retry(
-                model=MODEL_BRAIN,
+                model=brain._live_config()["model_brain"],
                 messages=[{"role": "user", "content": review_prompt}],
                 request_timeout=30
             )
@@ -1656,7 +1656,7 @@ UP主: {up_name}
         score, thought, learning_topic = 0, "", ""
         try:
             resp = await brain._call_ai_with_retry(
-                model=MODEL_BRAIN,
+                model=brain._live_config()["model_brain"],
                 messages=[
                     {"role": "system", "content": objective_prompt},
                     {"role": "user", "content": context}
@@ -1789,7 +1789,7 @@ AI判断: {thought}
             print(f"{Fore.CYAN}[Agent] AI思考中...{Style.RESET_ALL}")
             try:
                 resp = await brain._call_ai_with_retry(
-                    model=MODEL_BRAIN,
+                    model=brain._live_config()["model_brain"],
                     messages=messages,
                     request_timeout=90
                 )
@@ -2223,7 +2223,7 @@ async def up_homepage_learn(
                        f"【📺 视频内容字幕】: {subtitle_text[:3000]}\n")
 
             resp = await brain._call_ai_with_retry(
-                model=MODEL_BRAIN,
+                model=brain._live_config()["model_brain"],
                 messages=[
                     {"role": "system", "content": objective_prompt},
                     {"role": "user", "content": context}

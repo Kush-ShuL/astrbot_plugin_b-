@@ -196,6 +196,32 @@ class StartBotDependencyTests(unittest.IsolatedAsyncioTestCase):
         with patch.dict(sys.modules, {"brain.agent_brain": brain}):
             yield brain.AgentBrain
 
+    async def test_panel_configuration_is_applied_before_brain_creation(self):
+        panel = {"use_astrbot_config": True, "api": {"model_brain": "test-model"}}
+        self.bot.config = panel
+        bridge = ModuleType("core.astrbot_config_bridge")
+        bridge.apply_astrbot_config = Mock()
+        with dependency_environment(), self.brain_environment() as factory, patch.dict(
+            sys.modules, {"core.astrbot_config_bridge": bridge}
+        ):
+            factory.side_effect = lambda: (
+                bridge.apply_astrbot_config.assert_called_once_with(panel)
+                or SimpleNamespace(run=lambda: asyncio.Event().wait())
+            )
+            replies = await self.start()
+        self.assertIn("已在后台启动", replies[0])
+
+    async def test_invalid_panel_configuration_prevents_brain_creation(self):
+        self.bot.config = {"use_astrbot_config": True}
+        bridge = ModuleType("core.astrbot_config_bridge")
+        bridge.apply_astrbot_config = Mock(side_effect=ValueError("invalid configuration"))
+        with dependency_environment(), self.brain_environment() as factory, patch.dict(
+            sys.modules, {"core.astrbot_config_bridge": bridge}
+        ):
+            replies = await self.start()
+        self.assertIn("初始化失败", replies[0])
+        factory.assert_not_called()
+
     async def test_missing_socksio_does_not_block_background_start(self):
         with dependency_environment(missing={"socksio"}), self.brain_environment():
             replies = await self.start()

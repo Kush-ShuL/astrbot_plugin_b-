@@ -189,7 +189,7 @@ class BrainLoopMixin:
 
         # ── 智能省token模式（实时读取 config，避免 import * 缓存）──
         _smart_token = bool(config.get("system", {}).get("smart_token_mode", False))
-        _fast_model = (config.get("models", {}).get("fast") or MODEL_BRAIN) if _smart_token else MODEL_BRAIN
+        _fast_model = (config.get("models", {}).get("fast") or self._live_config()["model_brain"]) if _smart_token else self._live_config()["model_brain"]
         if _smart_token:
             log(f"💡 智能省token模式已启用：跳过封面/ASR、用快速模型({_fast_model})、"
                 f"关闭Agent深度搜索/好奇心探索/AI推荐/心理深度分析/知识验证", "INFO")
@@ -734,7 +734,7 @@ class BrainLoopMixin:
 
                 try:
                     resp = await self._call_ai_with_retry(
-                        model=_fast_model,
+                        model=(config.get("models", {}).get("fast") or self._live_config()["model_brain"]) if _smart_token else self._live_config()["model_brain"],
                         messages=[
                             {"role": "system", "content": sys_prompt},
                             {"role": "user", "content": context}
@@ -1362,7 +1362,7 @@ class BrainLoopMixin:
                         prompt = engine.generate_suggest_prompt(recent_titles)
                         try:
                             resp = await self._call_ai_with_retry(
-                                model=MODEL_BRAIN,
+                                model=self._live_config()["model_brain"],
                                 messages=[
                                     {"role": "system", "content": "你是兴趣建议器，基于观看历史建议新关键词。只输出合法JSON。"},
                                     {"role": "user", "content": prompt}

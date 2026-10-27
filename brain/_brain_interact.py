@@ -36,7 +36,7 @@ class BrainInteractMixin:
         if self._is_ai_degraded(): return "AI降级,跳过", 0
         try:
             resp = await self._call_ai_with_retry(
-                model=MODEL_VISION,
+                model=self._live_config()["model_vision"],
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPT_VISION},
                     {"role": "user", "content": [
@@ -109,7 +109,7 @@ UP主: {up}
 """
         try:
             resp = await self._call_ai_with_retry(
-                model=MODEL_BRAIN,
+                model=self._live_config()["model_brain"],
                 messages=[
                     {"role": "system", "content": "你是B站视频兴趣筛选器，只输出合法JSON。"},
                     {"role": "user", "content": prompt}
@@ -260,7 +260,7 @@ UP主: {up}
                 image_bytes, mime_type = await self._download_comment_image(cid, idx, url)
                 data_url = f"data:{mime_type};base64," + _b64.b64encode(image_bytes).decode("ascii")
                 resp = await self._call_ai_with_retry(
-                    model=MODEL_VISION,
+                    model=self._live_config()["model_vision"],
                     messages=[{
                         "role": "system",
                         "content": "你是评论图片分析助手。用一句简短中文描述图片内容（是什么类型的图、主要内容、情绪倾向）。"

@@ -585,8 +585,8 @@ def load_config():
                     _cipher_decrypt(k) for k in kw_list
                 ]
             return cfg
-        except (OSError, json.JSONDecodeError):
-            pass
+        except (OSError, json.JSONDecodeError) as exc:
+            raise ValueError(f"无法读取业务配置文件: {CONFIG_FILE}") from exc
     save_config(DEFAULT_CONFIG)
     return DEFAULT_CONFIG.copy()
 

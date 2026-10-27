@@ -83,7 +83,7 @@ class BrainLearnMixin:
                     log("长视频触发章节锁定 + 内容追加算法", "LEARN")
                     summary_content = await generate_chapter_locked_note(
                         ai_call=self._call_ai_with_retry,
-                        model=MODEL_BRAIN,
+                        model=self._live_config()["model_brain"],
                         system_prompt=SYSTEM_PROMPT_SUMMARY,
                         title=title,
                         up=up,
@@ -94,7 +94,7 @@ class BrainLearnMixin:
                     )
                 else:
                     resp = await self._call_ai_with_retry(
-                        model=MODEL_BRAIN,
+                        model=self._live_config()["model_brain"],
                         messages=[
                             {"role": "system", "content": SYSTEM_PROMPT_SUMMARY},
                             {"role": "user", "content": summary_context}
@@ -238,7 +238,7 @@ class BrainLearnMixin:
             comments_ctx = comments_ctx[:5000]
 
             resp = await self._call_ai_with_retry(
-                model=MODEL_BRAIN,
+                model=self._live_config()["model_brain"],
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPT_COMMENT_SUMMARY},
                     {"role": "user", "content": comments_ctx}

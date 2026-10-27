@@ -176,8 +176,9 @@ def _on_brain_done(task: asyncio.Task) -> None:
 
 
 class BilibiliLearningBot(Star):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, config=None):
         super().__init__(context)
+        self.config = config
 
     @staticmethod
     def _run_in_thread(func):
@@ -218,6 +219,10 @@ class BilibiliLearningBot(Star):
                 return
 
             try:
+                if self.config is not None:
+                    from core.astrbot_config_bridge import apply_astrbot_config
+
+                    apply_astrbot_config(self.config)
                 from brain.agent_brain import AgentBrain
 
                 brain = AgentBrain()

@@ -106,7 +106,7 @@ class BrainCuriosityMixin:
                         f"视频内容摘要:\n" + "\n---\n".join(all_subtitles[-5:])
                     )
                     resp = await self._call_ai_with_retry(
-                        model=MODEL_BRAIN,
+                        model=self._live_config()["model_brain"],
                         messages=[
                             {"role": "system", "content": SYSTEM_PROMPT_CURIOSITY_DIVE},
                             {"role": "user", "content": f"{review_context}\n\n{videos_watched}/{max_videos}个视频（上限{videos_watched}/{CURIOSITY_DEEP_DIVE_HIGH_VIDEOS}）。请判断是继续搜索还是已足够，并评估内容丰度。"}

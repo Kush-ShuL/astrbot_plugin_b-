@@ -76,17 +76,27 @@
 
 ---
 
+## ⚙️ AstrBot 插件配置
+
+- `use_astrbot_config` 默认为 `false`，默认继续使用旧配置。升级前建议备份 AstrBot 插件面板配置：AstrBot 加载新 schema 时会移除面板中不再声明的旧字段；独立业务配置文件不受此清理影响。
+- 启用 `use_astrbot_config` 后，还须在 `apply_sections` 中列出需要应用的配置组名称（如 `api`、`vision`）；默认空列表不会修改旧配置。发送 `/bili_start` 时，**所选组内所有面板字段，包括默认值，都会覆盖业务配置**，请先检查这些值；未选中的组和未暴露的字段会保留。已运行的机器人需先停止再启动。关闭开关不会撤销已写入的设置。
+- 面板中的密钥留空或填写脱敏值时，保留原有密钥；填写的新密钥会写入业务配置文件，沿用其现有的明文存储方式，请保护该文件。
+- `automation` 中的 `dry_run` 和 `allow` 不是全局操作保护，不能将其当作安全保障；使用者仍需自行控制和审核操作。
+- 插件不再暴露 Web 管理配置，也不会启动 Web 管理面板。
+
+---
+
 ## 📊 v3.0.2 → v3.1.x 版本对比
 
 | 维度 | v3.0.2 | v3.1.2+（当前 3.1.6） |
 |------|--------|----------------------|
 | **代码规模** | 77 个 Python 文件 / ~34k 行 | 113 个 Python 文件 / ~54k 行（+47%） |
 | **数据目录** | 项目内 `Data/`（打包/升级易丢） | ✅ `%LOCALAPPDATA%\BiliLearn`（打包产物零隐私数据，升级不丢） |
-| **人格管理** | 简单 prompt 配置 | ✅ Web 可视化多人格（创建 / 编辑 / 激活 / 删除），key 与显示名双匹配 |
+| **人格管理** | 简单 prompt 配置 | 多人格管理，key 与显示名双匹配 |
 | **HTML 渲染** | 各模块各自维护模板 | ✅ `services/html_renderer.py` 统一渲染（阅读页 / 幻灯片 / 导出） |
 | **服务模块** | 12 个 | ✅ 32 个（新增深度研习、测验生成、思维导图、Word 导出、本地收藏、点赞回顾、提醒、RAG 问答、平台适配、代理配置、版本历史…） |
 | **评论回复** | 基础回复 | ✅ 顶层/子回复路由修复、12006 失效处理、AI 选择失效 ID 跳过 |
-| **监听引擎** | 基础轮询 | ✅ 上下文合并、超时跳过、`-509` 退避、网页日志可视化 |
+| **监听引擎** | 基础轮询 | ✅ 上下文合并、超时跳过、`-509` 退避 |
 | **开放平台桥接** | ❌ | ✅ `ob_bridge/`（开放平台鉴权、AB 测试、审计） |
 | **备份与恢复** | 手动导出 | ✅ 分组备份（设置 / 记忆 / 知识 / 产物）+ 恢复 |
 | **测试** | 43 个 pytest | ✅ 181 个 pytest（`319 passed` 全量发布验证） |
@@ -129,7 +139,7 @@
 #英文版
 # bilibili_learning_bot
 
-> **Bilibili AI Learning Bot** — An AI that auto-watches videos, learns knowledge, interacts via comments, replies to DMs, evolves itself, with a built-in Web admin panel, and one-click Windows EXE packaging.
+> **Bilibili AI Learning Bot** — An AI that auto-watches videos, learns knowledge, interacts via comments, replies to DMs, and evolves itself.
 >
 > Version: **3.1.6** | License: MIT
 
@@ -161,18 +171,27 @@
 
 ---
 
+## ⚙️ AstrBot Plugin Configuration
+
+- `use_astrbot_config` defaults to `false`, so the existing configuration remains in use by default. Back up the AstrBot panel configuration before upgrading: AstrBot removes fields no longer present in the schema when it loads the plugin. This cleanup does not affect the separate business configuration file.
+- After enabling `use_astrbot_config`, list the configuration groups to apply in `apply_sections` (for example, `api` and `vision`); the default empty list leaves existing settings unchanged. On `/bili_start`, **all panel fields in the selected groups, including defaults, overwrite the business settings**, so check their values first. Unselected groups and unexposed fields are preserved. Stop and restart a running bot to apply changes. Disabling the switch does not undo previously saved values.
+- Leaving a secret blank or entering a redacted value preserves the existing secret. A new secret is written to the business configuration file using its existing plaintext storage; protect that file.
+- The `automation` settings `dry_run` and `allow` are not global protections for operations and must not be treated as security guarantees. Users must still control and review operations themselves.
+- The plugin no longer exposes Web administration settings and does not start a Web administration panel.
+
+---
+
 ## 📊 Version Comparison: v3.0.2 → v3.1.x
 
 | Dimension | v3.0.2 | v3.1.2+ (current 3.1.6) |
 |-----------|--------|--------------------------|
 | **Code Size** | 77 Python files / ~34k lines | 113 Python files / ~54k lines (+47%) |
 | **Data Directory** | In-project `Data/` (lost on packaging/upgrade) | ✅ `%LOCALAPPDATA%\BiliLearn` (packaged artifact contains zero private data, survives upgrades) |
- ✅ Dashboard / Bot Control / Real-time Listening / Persona Management / Knowledge Tutoring / Deep Study / Backup Restore |
-| **Persona Management** | Simple prompt config | ✅ Web visual multi-persona (create / edit / activate / delete), key + display-name dual matching |
+| **Persona Management** | Simple prompt config | Multi-persona management, key + display-name dual matching |
 | **HTML Rendering** | Each module maintained its own templates | ✅ `services/html_renderer.py` unified rendering (reading page / slides / export) |
 | **Service Modules** | 12 | ✅ 32 (added deep study, quiz generation, mind map, Word export, local favorites, like review, reminders, RAG Q&A, platform adaptation, proxy config, version history…) |
 | **Comment Replies** | Basic reply | ✅ Top-level/child reply routing fix, 12006 failure handling, AI skips invalid selected IDs |
-| **Listening Engine** | Basic polling | ✅ Context merging, timeout skip, `-509` backoff, web log visualization |
+| **Listening Engine** | Basic polling | ✅ Context merging, timeout skip, `-509` backoff |
 | **Open Platform Bridge** | ❌ | ✅ `ob_bridge/` (open-platform auth, A/B testing, audit) |
 | **Backup & Restore** | Manual export | ✅ Grouped backup (settings / memory / knowledge / artifacts) + restore |
 | **Tests** | 43 pytest | ✅ 181 pytest (`319 passed` full release verification) |
@@ -213,17 +232,11 @@ Check whether you're using a clean Python environment. If `PYTHONPATH` points to
 **Q: AI call reports `'ascii' codec can't encode...`?**
 Check whether `config.json`'s `api.vision_api_key` / `unified_api_key` was written as a placeholder like `"[hidden]"` (don't write back a desensitized config export). Clearing that field falls back to `unified_api_key`.
 
-**Q: Persona save says "does not exist"?**
-Caused by old-version data where the persona storage key didn't match the display name. 3.1.2+ already supports key/display-name dual matching; if it still happens, restart the panel to load new code, or delete `Data/web_personas.json` to re-migrate from `personas.json`.
-
 **Q: Why doesn't the exported config include Cookie and API Key?**
-Export has two modes: **desensitized export** (default, API Key / Cookie replaced with `[hidden]`, safe to share with others) and **full export** (includes real Key and login Cookie, for your own migration backup only, filename carries `_full` suffix). The web panel asks which to choose on export; the CLI menu enters `f` for full export. A full export imported to a new machine has login state and AI config working immediately.
+A desensitized export replaces API keys and cookies with `[hidden]`. A full export includes real credentials and must be protected; never share it publicly.
 
 **Q: After importing someone else's config backup, AI is all broken, reports `'ascii' codec can't encode`?**
 On backup export, API Key / Cookie is desensitized to `[hidden]`; old versions would import and overwrite real config with the placeholder. 3.1.2 stable has fixed this: on import it auto-filters `[hidden]` (keeps existing value if present, otherwise deletes the field and you must refill). Already-affected users please manually edit `%LOCALAPPDATA%\BiliLearn\Data\config.json` and replace the `[hidden]` in `unified_api_key` / `vision_api_key` with the real Key.
-
-**Q: Port already in use?**
-Default 18083; auto-increments if occupied. Or `set WEB_PORT=xxxx && python web_panel.py`.
 
 ---
 
